@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garden Bed Planner 🌿</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil:#8B6347;--wood:#6B4423;--wood-dark:#4A2E14;
+    --sage:#7A9E7E;--sage-dark:#5C7A60;
+    --cream:#F5EDD8;--cream-dark:#E8D9BF;
+    --blush:#E8B4A0;--dusty-rose:#C2856E;
+    --lavender:#B8A9C9;--moss:#4E6B3C;
+    --text:#3A2A1A;--text-light:#6B4F3A;
+    --petal:#F2C5B0;--white:#FDFAF5;
+    --delete:#C94040;--delete-dark:#A03030;--delete-light:#F0D0D0;
+    --accent-blue:#7aaec4;--accent-blue-dark:#5a8eaa;
+    --accent-gold:#c4a44a;--accent-gold-dark:#a08030;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Lato',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 20%,rgba(122,158,126,.15) 0%,transparent 50%),
+      radial-gradient(ellipse at 90% 80%,rgba(184,169,201,.15) 0%,transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%238B6347' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  header{text-align:center;padding:1.2rem 1rem .5rem;}
+  header h1{font-family:'Playfair Display',serif;font-size:2.1rem;color:var(--moss);text-shadow:1px 1px 0 rgba(255,255,255,.5);}
+  header h1 span{font-style:italic;color:var(--dusty-rose);}
+  header p{color:var(--text-light);font-weight:300;font-size:.8rem;margin-top:.15rem;letter-spacing:.08em;text-transform:uppercase;}
+  .deco{color:var(--sage);font-size:1rem;letter-spacing:.5rem;margin-top:.2rem;opacity:.7;}
+
+  /* ── bed tabs ── */
+  .bed-tabs-bar{
+    display:flex;align-items:center;gap:.4rem;
+    padding:.4rem 1.4rem .0rem;max-width:1300px;margin:0 auto;
+    border-bottom:2px solid var(--cream-dark);
+  }
+  .bed-tab{
+    padding:.35rem .8rem;border:2px solid var(--cream-dark);background:var(--cream);
+    border-bottom:none;border-radius:8px 8px 0 0;cursor:pointer;
+    font-family:'Lato',sans-serif;font-size:.78rem;color:var(--text-light);
+    transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:.3rem;
+    position:relative;bottom:-2px;
+  }
+  .bed-tab:hover{background:var(--cream-dark);}
+  .bed-tab.active{background:var(--white);border-color:var(--cream-dark);color:var(--moss);font-weight:600;border-bottom:2px solid var(--white);}
+  .bed-tab .tab-close{
+    margin-left:.2rem;width:14px;height:14px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.7rem;color:var(--text-light);
+    transition:background .12s,color .12s;
+    flex-shrink:0;
+  }
+  .bed-tab .tab-close:hover{background:var(--delete);color:#fff;}
+  .bed-tab-add{
+    padding:.3rem .55rem;border:2px dashed var(--cream-dark);background:transparent;
+    border-radius:8px;cursor:pointer;font-size:1rem;color:var(--sage-dark);
+    transition:all .15s;position:relative;bottom:-2px;
+  }
+  .bed-tab-add:hover{background:var(--cream-dark);}
+
+  /* ── page layout ── */
+  .app-layout{
+    display:flex;gap:1.4rem;
+    padding:.8rem 1.4rem 2rem;
+    max-width:1300px;margin:0 auto;
+    align-items:flex-start;
+    justify-content:center;
+  }
+
+  /* ── toolbar ── */
+  .toolbar{
+    background:var(--white);border:2px solid var(--cream-dark);border-radius:16px;
+    padding:1rem;min-width:220px;max-width:220px;
+    box-shadow:3px 3px 0 var(--cream-dark);position:sticky;top:.5rem;flex-shrink:0;
+    max-height:calc(100vh - 1rem);overflow-y:auto;overflow-x:hidden;
+  }
+  .toolbar h3{font-family:'Playfair Display',serif;font-size:.88rem;color:var(--moss);margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px dashed var(--cream-dark);display:flex;align-items:center;gap:.4rem;}
+  .tool-section{margin-bottom:.9rem;}
+  .tool-section > label{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-light);margin-bottom:.28rem;}
+  .mode-buttons{display:flex;flex-direction:column;gap:.28rem;}
+  .mode-btn{
+    padding:.38rem .6rem;border:2px solid var(--cream-dark);background:var(--cream);
+    border-radius:8px;cursor:pointer;font-family:'Lato',sans-serif;font-size:.76rem;
+    color:var(--text);text-align:left;transition:all .15s;display:flex;align-items:center;gap:.35rem;
+  }
+  .mode-btn:hover{background:var(--cream-dark);}
+  .mode-btn.active{background:var(--sage);border-color:var(--sage-dark);color:#fff;box-shadow:2px 2px 0 var(--sage-dark);}
+  .mode-btn.delete-mode.active{background:var(--delete);border-color:var(--delete-dark);color:#fff;box-shadow:2px 2px 0 var(--delete-dark);}
+  .mode-btn.delete-mode:hover:not(.active){background:var(--delete-light);}
+  .canvas-delete{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23C94040' opacity='.25'/%3E%3Cline x1='8' y1='8' x2='16' y2='16' stroke='%23C94040' stroke-width='2.5' stroke-linecap='round'/%3E%3Cline x1='16' y1='8' x2='8' y2='16' stroke='%23C94040' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 12 12,not-allowed!important;}
+  .tool-hint-box{
+    background:rgba(122,158,126,.1);border:1.5px dashed var(--sage);
+    border-radius:8px;padding:.45rem .55rem;display:flex;flex-direction:column;gap:.25rem;
+  }
+  .gesture-hint-row{font-size:.69rem;color:var(--text-light);line-height:1.3;}
+  .gesture-hint-row b{color:var(--moss);}
+
+  .size-slider{width:100%;accent-color:var(--sage-dark);margin-top:.2rem;}
+  .size-preview{display:flex;align-items:center;justify-content:center;height:48px;}
+  #sizeCircle{border:2.5px dashed var(--sage);border-radius:50%;background:rgba(122,158,126,.12);transition:all .15s;}
+  .dim-display{font-size:.67rem;color:var(--text-light);text-align:center;margin-top:.12rem;}
+
+  .color-swatches{display:grid;grid-template-columns:repeat(6,1fr);gap:.22rem;}
+  .swatch{width:100%;aspect-ratio:1;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s;}
+  .swatch:hover{transform:scale(1.2);}
+  .swatch.selected{border-color:var(--wood);transform:scale(1.12);}
+
+  .snap-row{display:flex;align-items:center;gap:.4rem;font-size:.71rem;color:var(--text-light);cursor:pointer;user-select:none;}
+  .snap-row input{accent-color:var(--sage-dark);width:13px;height:13px;cursor:pointer;}
+
+  /* ── plant profiles ── */
+  .profiles-list{display:flex;flex-direction:column;gap:.25rem;max-height:160px;overflow-y:auto;}
+  .profile-item{
+    display:flex;align-items:center;gap:.4rem;padding:.28rem .4rem;
+    border:1.5px solid var(--cream-dark);border-radius:7px;cursor:pointer;
+    background:var(--cream);transition:background .12s;font-size:.74rem;
+  }
+  .profile-item:hover{background:var(--cream-dark);}
+  .profile-item.active-profile{background:rgba(122,158,126,.18);border-color:var(--sage);}
+  .profile-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;}
+  .profile-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .profile-del{font-size:.7rem;color:var(--text-light);padding:0 .1rem;cursor:pointer;flex-shrink:0;}
+  .profile-del:hover{color:var(--delete);}
+  .profile-add-row{display:flex;gap:.28rem;margin-top:.3rem;}
+  .profile-add-row input{flex:1;padding:.3rem .4rem;border:1.5px solid var(--cream-dark);border-radius:6px;font-size:.73rem;font-family:'Lato',sans-serif;background:var(--cream);color:var(--text);outline:none;}
+  .profile-add-row input:focus{border-color:var(--sage);}
+  .btn-sm{padding:.3rem .45rem;border:1.5px solid;border-radius:6px;cursor:pointer;font-family:'Lato',sans-serif;font-size:.72rem;transition:all .12s;}
+  .btn-sm-sage{background:var(--sage);border-color:var(--sage-dark);color:#fff;}
+  .btn-sm-sage:hover{background:var(--sage-dark);}
+
+  .action-btn{width:100%;padding:.44rem;border:2px solid;border-radius:8px;cursor:pointer;font-family:'Lato',sans-serif;font-size:.75rem;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.3rem;margin-bottom:.28rem;}
+  .btn-undo{background:var(--lavender);border-color:#9B8AB0;color:var(--wood-dark);}
+  .btn-undo:hover{background:#C5BAD6;}
+  .btn-redo{background:#d4e8d4;border-color:#a0c0a0;color:var(--wood-dark);}
+  .btn-redo:hover{background:#b8d8b8;}
+  .btn-clear{background:var(--petal);border-color:var(--dusty-rose);color:var(--wood-dark);}
+  .btn-clear:hover{background:var(--blush);}
+  .btn-print{background:var(--sage);border-color:var(--sage-dark);color:#fff;box-shadow:2px 2px 0 var(--sage-dark);}
+  .btn-print:hover{background:var(--sage-dark);}
+  .btn-png{background:var(--accent-blue);border-color:var(--accent-blue-dark);color:#fff;box-shadow:2px 2px 0 var(--accent-blue-dark);}
+  .btn-png:hover{background:var(--accent-blue-dark);}
+  .btn-save{background:var(--accent-gold);border-color:var(--accent-gold-dark);color:#fff;box-shadow:2px 2px 0 var(--accent-gold-dark);}
+  .btn-save:hover{background:var(--accent-gold-dark);}
+  .btn-load{background:var(--cream);border-color:var(--cream-dark);color:var(--text);}
+  .btn-load:hover{background:var(--cream-dark);}
+
+  /* ── bed wrapper ── */
+  .bed-wrapper{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;}
+  .bed-name-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap;}
+
+  /* ── zoom controls ── */
+  .zoom-controls{display:flex;align-items:center;gap:.22rem;margin-left:auto;}
+  .zoom-btn{
+    width:26px;height:26px;border:1.5px solid var(--cream-dark);border-radius:7px;
+    background:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    color:var(--text-light);transition:all .12s;padding:0;flex-shrink:0;
+  }
+  .zoom-btn:hover{background:var(--cream-dark);color:var(--moss);}
+  .zoom-reset-btn{
+    padding:.12rem .38rem;border:1.5px solid var(--cream-dark);border-radius:7px;
+    background:var(--cream);cursor:pointer;font-size:.69rem;color:var(--text-light);
+    font-family:'Lato',sans-serif;min-width:40px;text-align:center;transition:all .12s;
+  }
+  .zoom-reset-btn:hover{background:var(--cream-dark);}
+  .zoom-reset-btn.zoomed{background:var(--sage);border-color:var(--sage-dark);color:#fff;}
+
+  /* ── bed viewport / scaler ── */
+  .bed-viewport{
+    overflow:auto;max-width:100%;position:relative;
+    scrollbar-width:thin;scrollbar-color:var(--cream-dark) transparent;
+  }
+  .bed-viewport::-webkit-scrollbar{width:8px;height:8px;}
+  .bed-viewport::-webkit-scrollbar-track{background:transparent;}
+  .bed-viewport::-webkit-scrollbar-thumb{background:var(--cream-dark);border-radius:4px;}
+  .bed-viewport::-webkit-scrollbar-corner{background:transparent;}
+  .bed-scaler{display:inline-block;transform-origin:top left;}
+  .bed-name-input{
+    font-family:'Playfair Display',serif;font-style:italic;font-size:1rem;
+    border:none;border-bottom:2px dashed var(--cream-dark);background:transparent;
+    color:var(--moss);outline:none;text-align:center;width:180px;
+    transition:border-color .15s;
+  }
+  .bed-name-input:focus{border-bottom-color:var(--sage);}
+  .bed-dims{font-size:.7rem;color:var(--text-light);}
+
+  /* rulers */
+  .ruler-row{display:flex;align-items:flex-start;}
+  .ruler-corner{flex-shrink:0;}
+  .ruler-top{display:flex;font-family:'Playfair Display',serif;font-style:italic;font-size:.6rem;color:var(--text-light);}
+  .ruler-top-cell{border-left:1px solid var(--cream-dark);display:flex;align-items:flex-end;padding-bottom:2px;padding-left:2px;flex-shrink:0;}
+  .ruler-left{flex-shrink:0;font-family:'Playfair Display',serif;font-style:italic;font-size:.6rem;color:var(--text-light);display:flex;flex-direction:column;}
+  .ruler-left-cell{border-top:1px solid var(--cream-dark);display:flex;align-items:flex-start;justify-content:flex-end;padding-right:3px;padding-top:1px;flex-shrink:0;}
+
+  /* bed frame */
+  .bed-frame{background:var(--wood);border-radius:10px;padding:13px;box-shadow:0 0 0 5px var(--wood-dark),5px 8px 26px rgba(0,0,0,.28),inset 0 2px 4px rgba(255,255,255,.1);position:relative;}
+  .bed-frame::before{content:'';position:absolute;inset:0;border-radius:10px;background:repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(0,0,0,.04) 40px,rgba(0,0,0,.04) 41px);pointer-events:none;}
+  .bed-inner{background:var(--soil);border-radius:5px;overflow:hidden;position:relative;
+    background-image:radial-gradient(ellipse at 20% 20%,rgba(160,120,90,.35) 0%,transparent 40%),radial-gradient(ellipse at 80% 75%,rgba(100,70,40,.28) 0%,transparent 40%),url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23704d30' fill-opacity='0.22'%3E%3Ccircle cx='5' cy='5' r='1.5'/%3E%3Ccircle cx='15' cy='12' r='1'/%3E%3Ccircle cx='25' cy='7' r='1.5'/%3E%3Ccircle cx='35' cy='18' r='1'/%3E%3Ccircle cx='10' cy='22' r='1.5'/%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3Ccircle cx='20' cy='35' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
+    cursor:crosshair;}
+  #gardenCanvas{display:block;width:100%;position:relative;z-index:1;}
+  .hint{font-size:.71rem;color:#A0785A;font-style:italic;margin-top:.45rem;text-align:center;}
+
+  /* ── modal ── */
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(58,42,26,.5);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+  .modal-backdrop.open{display:flex;}
+  .modal{background:var(--white);border:2px solid var(--cream-dark);border-radius:16px;padding:1.4rem;width:285px;box-shadow:6px 6px 0 var(--cream-dark);animation:popIn .18s ease;}
+  @keyframes popIn{from{transform:scale(.85) translateY(10px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+  .modal h3{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--moss);margin-bottom:.75rem;text-align:center;}
+  .modal input[type=text]{width:100%;padding:.45rem .65rem;border:2px solid var(--cream-dark);border-radius:8px;font-family:'Playfair Display',serif;font-size:.86rem;color:var(--text);background:var(--cream);outline:none;margin-bottom:.35rem;}
+  .modal input[type=text]:focus{border-color:var(--sage);}
+  .modal-note{font-size:.68rem;color:var(--text-light);text-align:center;margin-bottom:.8rem;font-style:italic;}
+  .modal-actions{display:flex;gap:.4rem;}
+  .modal-actions button{flex:1;padding:.42rem;border-radius:8px;border:2px solid;cursor:pointer;font-family:'Lato',sans-serif;font-size:.78rem;transition:all .15s;}
+  .btn-modal-save{background:var(--sage);border-color:var(--sage-dark);color:#fff;}
+  .btn-modal-save:hover{background:var(--sage-dark);}
+  .btn-cancel{background:var(--cream);border-color:var(--cream-dark);color:var(--text);}
+  .btn-cancel:hover{background:var(--cream-dark);}
+
+  /* ── print legend ── */
+  .print-legend{display:none;}
+
+  @media print{
+    body{background:#fff;}
+    .toolbar,.bed-tabs-bar,header p,.deco,.hint,.ruler-top,.ruler-left,.ruler-corner,.bed-name-row{display:none!important;}
+    header h1{color:#4E6B3C;}
+    .app-layout{padding:0;justify-content:center;}
+    .bed-wrapper{align-items:center;}
+    .bed-frame{box-shadow:none;border:3px solid #6B4423;}
+    .modal-backdrop{display:none!important;}
+    .ruler-row{display:block;}
+    .print-legend{display:block;margin-top:1.2rem;padding:0 .5rem;}
+    .print-legend h4{font-family:'Playfair Display',serif;font-size:.95rem;color:#4E6B3C;margin-bottom:.5rem;border-bottom:1px solid #ccc;padding-bottom:.3rem;}
+    .legend-grid{display:flex;flex-wrap:wrap;gap:.4rem .8rem;}
+    .legend-item{display:flex;align-items:center;gap:.35rem;font-size:.78rem;font-family:'Lato',sans-serif;color:#3A2A1A;}
+    .legend-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:1.5px solid rgba(0,0,0,.15);}
+  }
+
+  #loadFileInput{display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌿 My <span>Garden</span> Planner</h1>
+  <p>Multi-bed layout designer · 4″ grid</p>
+  <div class="deco">❧ ✿ ❧</div>
+</header>
+
+<!-- BED TABS -->
+<div class="bed-tabs-bar" id="bedTabsBar">
+  <!-- tabs injected by JS -->
+  <button class="bed-tab-add" id="btnAddBed" title="Add new bed">＋</button>
+</div>
+
+<div class="app-layout">
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="tool-section">
+      <h3>🌱 Tools</h3>
+      <div class="tool-hint-box" id="gestureHintBox">
+        <div class="gesture-hint-row">🖱️ <b>Click empty soil</b> — place plant</div>
+        <div class="gesture-hint-row">↔️ <b>Click + drag</b> — set size</div>
+        <div class="gesture-hint-row">✋ <b>Click plant</b> — move it</div>
+      </div>
+      <div class="mode-buttons" style="margin-top:.5rem;">
+        <button class="mode-btn active"      data-mode="place">🌿 Place / Move</button>
+        <button class="mode-btn"             data-mode="edit">🏷️ Label / Edit</button>
+        <button class="mode-btn delete-mode" data-mode="delete" id="btnDeleteMode">🗑️ Delete Plant <i style="font-size:.63rem;opacity:.6;margin-left:.2rem;">ctrl</i></button>
+      </div>
+    </div>
+
+    <div class="tool-section">
+      <label>Circle Size (radius)</label>
+      <input type="range" class="size-slider" id="sizeSlider" min="1" max="18" value="4">
+      <div class="size-preview"><div id="sizeCircle"></div></div>
+      <div class="dim-display" id="dimDisplay"></div>
+    </div>
+
+    <div class="tool-section">
+      <label>Snap to Grid</label>
+      <label class="snap-row"><input type="checkbox" id="snapToggle" checked> Snap centres</label>
+    </div>
+
+    <div class="tool-section">
+      <label>Plant Color</label>
+      <div class="color-swatches" id="colorSwatches"></div>
+    </div>
+
+    <div class="tool-section">
+      <h3>🌼 Plant Profiles</h3>
+      <div class="profiles-list" id="profilesList"></div>
+      <div class="profile-add-row">
+        <input type="text" id="profileNameInput" placeholder="Profile name…" maxlength="24">
+        <button class="btn-sm btn-sm-sage" id="btnSaveProfile" title="Save current settings as profile">＋</button>
+      </div>
+    </div>
+
+    <div class="tool-section">
+      <h3>🌸 Actions</h3>
+      <button class="action-btn btn-undo"  id="btnUndo">↩ Undo <span style="font-size:.68rem;opacity:.7">(Ctrl+Z)</span></button>
+      <button class="action-btn btn-redo"  id="btnRedo">↪ Redo <span style="font-size:.68rem;opacity:.7">(Ctrl+Y)</span></button>
+      <button class="action-btn btn-clear" onclick="clearAll()">✕ Clear Bed</button>
+      <button class="action-btn btn-png"   onclick="exportPNG()">🖼 Export PNG</button>
+      <button class="action-btn btn-print" onclick="buildLegendAndPrint()">🖨 Print Layout</button>
+      <button class="action-btn btn-save"  onclick="saveJSON()">💾 Save to File</button>
+      <button class="action-btn btn-load"  onclick="document.getElementById('loadFileInput').click()">📂 Load File</button>
+      <input type="file" id="loadFileInput" accept=".json" onchange="loadJSON(event)">
+    </div>
+  </div>
+
+  <!-- BED + RULERS -->
+  <div class="bed-wrapper">
+    <div class="bed-name-row">
+      <input class="bed-name-input" id="bedNameInput" value="Bed 1" maxlength="32">
+      <span class="bed-dims" id="bedDimsLabel"></span>
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="btnZoomOut" title="Zoom out (scroll wheel)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="5.8" cy="5.8" r="4" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="8.7" y1="8.7" x2="12.5" y2="12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="3.3" y1="5.8" x2="8.3" y2="5.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="zoom-reset-btn" id="btnZoomReset" title="Reset zoom to 100%"><span id="zoomDisplay">100%</span></button>
+        <button class="zoom-btn" id="btnZoomIn" title="Zoom in (scroll wheel)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="5.8" cy="5.8" r="4" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="8.7" y1="8.7" x2="12.5" y2="12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="5.8" y1="3.3" x2="5.8" y2="8.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="3.3" y1="5.8" x2="8.3" y2="5.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="bed-viewport" id="bedViewport">
+      <div class="bed-scaler" id="bedScaler">
+        <div class="ruler-row">
+          <div class="ruler-corner" id="rulerCorner"></div>
+          <div class="ruler-top"    id="rulerTop"></div>
+        </div>
+        <div class="ruler-row" style="align-items:stretch;">
+          <div class="ruler-left" id="rulerLeft"></div>
+          <div>
+            <div class="bed-frame">
+              <div class="bed-inner" id="bedInner">
+                <canvas id="gardenCanvas"></canvas>
+                <canvas id="gridCanvas"  style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hint" id="hintText">Click soil to place · Drag from soil to size · Click plant to move</div>
+
+    <!-- Print legend (hidden on screen, shown on print) -->
+    <div class="print-legend" id="printLegend">
+      <h4>🌿 Plant Legend</h4>
+      <div class="legend-grid" id="legendGrid"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- LABEL MODAL -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h3>🌷 Edit Plant</h3>
+    <input type="text" id="plantNameInput" placeholder="e.g. Lavender, Tomato…" maxlength="28">
+    <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-light);margin:.6rem 0 .3rem;">Color</div>
+    <div class="color-swatches" id="modalColorSwatches" style="margin-bottom:.6rem;"></div>
+    <div class="modal-note">Enter to save · Esc to cancel</div>
+    <div class="modal-actions">
+      <button class="btn-modal-save" onclick="saveLabel()">Save</button>
+      <button class="btn-cancel"     onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── palette ───────────────────────────────────────────────
+const PLANT_COLORS = [
+  '#C4D9C5','#A8C8AA','#8DB890','#7A9E7E','#6A8E6D','#527058',
+  '#9DBF6E','#7EA84E','#5C8A3C','#4E7032','#7A9B6A','#3D5C28',
+  '#F7D9CF','#F2C5B0','#E8B4A0','#D9957A','#C2856E','#A86050',
+  '#E8C8C0','#D4A8A0','#C49090','#B07878','#D4B0B8','#C098A8',
+  '#DDD4EA','#C8BCE0','#B8A9C9','#A090B8','#8878A8','#706090',
+  '#FBF0C0','#F5E080','#EDD060','#D4B840','#B89828','#8C7820',
+  '#F0C8C0','#E09888','#D06858','#B84840','#A03030','#7A2020',
+];
+
+// ── bed data structure ─────────────────────────────────────
+function makeBed(name='Bed 1', wIn=72, hIn=144) {
+  return { name, w_in: wIn, h_in: hIn, plants: [] };
+}
+
+// ── global state ──────────────────────────────────────────
+let beds        = [makeBed('Bed 1')];
+let activeBedIdx = 0;
+let profiles    = [];   // [{name, color, r_in}]
+let activeProfileIdx = -1;
+
+// per-bed undo/redo stacks stored alongside bed data
+// stored as beds[i]._hist / beds[i]._future (not saved to JSON)
+
+let mode      = 'place';  // 'place' | 'edit' | 'delete'
+let color     = PLANT_COLORS[0];
+let radius_in = 4;
+let snapOn    = true;
+let editIdx   = null;
+let pxPerIn   = 1;
+let hoverIdx  = -1;
+
+// ── unified place/move gesture ────────────────────────────
+const DRAG_THRESHOLD = 6; // px before committing to a resize gesture
+let gesture = null;
+// gesture fields: type ('pending'|'sizing'|'moving'), startX/Y, plantIdx,
+//   liveX_in/liveY_in, liveR_in (sizing), offX/offY (moving)
+let zoom      = 1.0;
+let baseCanvasW = 0;
+let baseCanvasH = 0;
+const MIN_ZOOM  = 0.5;
+const MAX_ZOOM  = 4.0;
+const ZOOM_STEP = 0.25;
+const FRAME_PAD = 26; // bed-frame padding: 13px × 2
+
+// ── shortcuts to active bed ───────────────────────────────
+function bed()  { return beds[activeBedIdx]; }
+function plants(){ return beds[activeBedIdx].plants; }
+
+// ── DOM refs ──────────────────────────────────────────────
+const canvas   = document.getElementById('gardenCanvas');
+const ctx      = canvas.getContext('2d');
+const gridCv   = document.getElementById('gridCanvas');
+const gCtx     = gridCv.getContext('2d');
+const bedInner = document.getElementById('bedInner');
+
+// ── history helpers (per bed) ─────────────────────────────
+function saveH() {
+  const b = bed();
+  if (!b._hist) b._hist = [];
+  if (!b._future) b._future = [];
+  b._hist.push(JSON.stringify(b.plants));
+  if (b._hist.length > 60) b._hist.shift();
+  b._future = [];
+}
+function undo() {
+  const b = bed();
+  if (!b._hist || !b._hist.length) return;
+  if (!b._future) b._future = [];
+  b._future.push(JSON.stringify(b.plants));
+  b.plants = JSON.parse(b._hist.pop());
+  renderAll();
+}
+function redo() {
+  const b = bed();
+  if (!b._future || !b._future.length) return;
+  b._hist.push(JSON.stringify(b.plants));
+  b.plants = JSON.parse(b._future.pop());
+  renderAll();
+}
+
+// ── tab management ────────────────────────────────────────
+function renderTabs() {
+  const bar = document.getElementById('bedTabsBar');
+  const addBtn = document.getElementById('btnAddBed');
+  // remove old tabs
+  bar.querySelectorAll('.bed-tab').forEach(t => t.remove());
+  beds.forEach((b, i) => {
+    const t = document.createElement('div');
+    t.className = 'bed-tab' + (i === activeBedIdx ? ' active' : '');
+    t.innerHTML = `<span class="tab-label">${b.name}</span>`;
+    if (beds.length > 1) {
+      const x = document.createElement('span');
+      x.className = 'tab-close';
+      x.textContent = '✕';
+      x.title = 'Remove bed';
+      x.addEventListener('click', e => { e.stopPropagation(); removeBed(i); });
+      t.appendChild(x);
+    }
+    t.addEventListener('click', () => switchBed(i));
+    bar.insertBefore(t, addBtn);
+  });
+}
+
+function switchBed(i) {
+  activeBedIdx = i;
+  zoom = 1.0;
+  hoverIdx = -1;
+  gesture = null;
+  document.getElementById('bedNameInput').value = bed().name;
+  renderTabs();
+  resize();
+}
+
+function addBed() {
+  const n = beds.length + 1;
+  beds.push(makeBed(`Bed ${n}`));
+  switchBed(beds.length - 1);
+}
+
+function removeBed(i) {
+  if (beds.length === 1) return;
+  if (!confirm(`Remove "${beds[i].name}" and all its plants?`)) return;
+  beds.splice(i, 1);
+  if (activeBedIdx >= beds.length) activeBedIdx = beds.length - 1;
+  switchBed(activeBedIdx);
+}
+
+document.getElementById('btnAddBed').addEventListener('click', addBed);
+document.getElementById('bedNameInput').addEventListener('input', e => {
+  bed().name = e.target.value || 'Bed';
+  renderTabs();
+});
+
+// ── resize ────────────────────────────────────────────────
+function resize() {
+  const b = bed();
+  const aspect = b.h_in / b.w_in;
+  // Use .bed-wrapper (flex:1 item) for a stable reference that doesn't
+  // feed back into itself the way bed-frame.clientWidth did.
+  const bedWrap = document.querySelector('.bed-wrapper');
+  const rulerLeftW = 28;
+  const avW = Math.max(100, bedWrap.clientWidth - rulerLeftW - FRAME_PAD - 4);
+  const avH = window.innerHeight * 0.78;
+  baseCanvasW = Math.round(Math.min(avW, avH / aspect));
+  baseCanvasH = Math.round(baseCanvasW * aspect);
+  applyZoom();
+}
+
+function applyZoom() {
+  const b = bed();
+
+  // Canvas always stays at base dimensions — zoom is purely a CSS transform.
+  canvas.width        = baseCanvasW;
+  canvas.height       = baseCanvasH;
+  canvas.style.width  = baseCanvasW + 'px';
+  canvas.style.height = baseCanvasH + 'px';
+  gridCv.width        = baseCanvasW;
+  gridCv.height       = baseCanvasH;
+  gridCv.style.width  = baseCanvasW + 'px';
+  gridCv.style.height = baseCanvasH + 'px';
+  pxPerIn = baseCanvasW / b.w_in;
+
+  document.getElementById('bedDimsLabel').textContent =
+    `${b.w_in/12} ft × ${b.h_in/12} ft`;
+
+  // Build content at base size first so the scaler has correct dimensions.
+  buildRulers();
+  drawGrid();
+  renderAll();
+  updateSizeUI();
+
+  // Now apply the CSS transform and size the spacer for scroll range.
+  const scaler   = document.getElementById('bedScaler');
+  const viewport = document.getElementById('bedViewport');
+
+  scaler.style.transform = 'none';
+  const nW = scaler.offsetWidth;
+  const nH = scaler.offsetHeight;
+  scaler.style.transform       = `scale(${zoom})`;
+  scaler.style.transformOrigin = 'top left';
+
+  // An invisible spacer gives the viewport the correct scrollable area.
+  let spacer = document.getElementById('zoomSpacer');
+  if (!spacer) {
+    spacer = document.createElement('div');
+    spacer.id = 'zoomSpacer';
+    spacer.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;visibility:hidden;';
+    viewport.appendChild(spacer);
+  }
+  spacer.style.width  = Math.round(nW * zoom) + 'px';
+  spacer.style.height = Math.round(nH * zoom) + 'px';
+
+  const pct = Math.round(zoom * 100);
+  document.getElementById('zoomDisplay').textContent = pct + '%';
+  document.getElementById('btnZoomReset').classList.toggle('zoomed', zoom !== 1.0);
+}
+
+function setZoom(level) {
+  const viewport = document.getElementById('bedViewport');
+  const prev = zoom;
+  zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM,
+         Math.round(level / ZOOM_STEP) * ZOOM_STEP));
+  if (zoom === prev) return;
+  // Keep the visual centre stable while zooming.
+  const cx = (viewport.scrollLeft + viewport.clientWidth  / 2) / prev;
+  const cy = (viewport.scrollTop  + viewport.clientHeight / 2) / prev;
+  applyZoom();
+  requestAnimationFrame(() => {
+    viewport.scrollLeft = cx * zoom - viewport.clientWidth  / 2;
+    viewport.scrollTop  = cy * zoom - viewport.clientHeight / 2;
+  });
+}
+
+// ── rulers ────────────────────────────────────────────────
+const GRID_IN = 4;
+function buildRulers() {
+  const b = bed();
+  // Rulers always reflect 100% zoom scale so they stay accurate as a reference.
+  const basePx = baseCanvasW / b.w_in;
+  const cell   = GRID_IN * basePx;
+  const cols   = b.w_in / GRID_IN;
+  const rows   = b.h_in / GRID_IN;
+
+  const corner = document.getElementById('rulerCorner');
+  corner.style.width = '28px'; corner.style.height = '20px';
+
+  const rt = document.getElementById('rulerTop');
+  rt.innerHTML = ''; rt.style.width = baseCanvasW+'px'; rt.style.height = '20px';
+  for (let i=0; i<cols; i++) {
+    const d = document.createElement('div');
+    d.className = 'ruler-top-cell';
+    d.style.width = cell+'px'; d.style.height = '20px';
+    const inch = i * GRID_IN;
+    if (inch % 12 === 0) d.textContent = inch===0 ? '0' : (inch/12)+'ft';
+    rt.appendChild(d);
+  }
+
+  const rl = document.getElementById('rulerLeft');
+  rl.innerHTML = ''; rl.style.width = '28px'; rl.style.height = baseCanvasH+'px';
+  for (let i=0; i<rows; i++) {
+    const d = document.createElement('div');
+    d.className = 'ruler-left-cell';
+    d.style.height = cell+'px'; d.style.width = '28px';
+    const inch = i * GRID_IN;
+    if (inch % 12 === 0) d.textContent = inch===0 ? '0' : (inch/12)+'ft';
+    rl.appendChild(d);
+  }
+}
+
+// ── grid ──────────────────────────────────────────────────
+function drawGrid() {
+  const b = bed();
+  const w = gridCv.width, h = gridCv.height, cell = GRID_IN * pxPerIn;
+  gCtx.clearRect(0,0,w,h);
+  for (let c=0; c<=b.w_in/GRID_IN; c++) {
+    const x=Math.round(c*cell), ft=(c*GRID_IN)%12===0;
+    gCtx.beginPath(); gCtx.moveTo(x,0); gCtx.lineTo(x,h);
+    gCtx.strokeStyle=ft?'rgba(255,255,255,.28)':'rgba(255,255,255,.10)';
+    gCtx.lineWidth=ft?1.5:.8; gCtx.stroke();
+  }
+  for (let r=0; r<=b.h_in/GRID_IN; r++) {
+    const y=Math.round(r*cell), ft=(r*GRID_IN)%12===0;
+    gCtx.beginPath(); gCtx.moveTo(0,y); gCtx.lineTo(w,y);
+    gCtx.strokeStyle=ft?'rgba(255,255,255,.28)':'rgba(255,255,255,.10)';
+    gCtx.lineWidth=ft?1.5:.8; gCtx.stroke();
+  }
+}
+
+// ── snap ──────────────────────────────────────────────────
+function snap(xPx,yPx){
+  if(!snapOn) return{x:xPx,y:yPx};
+  const cell=GRID_IN*pxPerIn;
+  return{x:Math.round(xPx/cell)*cell,y:Math.round(yPx/cell)*cell};
+}
+
+// ── render ────────────────────────────────────────────────
+function renderAll(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  plants().forEach((p,i)=>drawPlant(p, i===hoverIdx && mode==='delete'));
+}
+
+function drawPlant(p, deleteHover){
+  const r=p.r_in*pxPerIn, x=p.x_in*pxPerIn, y=p.y_in*pxPerIn;
+  ctx.globalAlpha = 1;
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,.28)'; ctx.shadowBlur=6; ctx.shadowOffsetY=3;
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle = deleteHover ? 'rgba(180,40,40,.55)' : p.color;
+  ctx.fill();
+  ctx.restore();
+  ctx.save(); ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.strokeStyle = deleteHover ? '#C94040' : darken(p.color,.22);
+  ctx.lineWidth=deleteHover?2.5:1.5; ctx.stroke();
+  ctx.restore();
+  if (r>20 && !deleteHover) {
+    ctx.save();
+    ctx.translate(x+r*.54,y-r*.54); ctx.rotate(-Math.PI/4);
+    ctx.fillStyle=darken(p.color,.28);
+    ctx.beginPath(); ctx.ellipse(0,0,r*.13,r*.22,0,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  if (deleteHover) {
+    ctx.save();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=Math.max(2,r*.12); ctx.lineCap='round';
+    const s=r*.35;
+    ctx.beginPath(); ctx.moveTo(x-s,y-s); ctx.lineTo(x+s,y+s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+s,y-s); ctx.lineTo(x-s,y+s); ctx.stroke();
+    ctx.restore();
+  }
+  if (p.label && !deleteHover) {
+    ctx.save();
+    const fs=Math.max(8,Math.min(13,r*.37));
+    ctx.font=`italic ${fs}px 'Playfair Display',serif`;
+    ctx.fillStyle='#3A2A1A'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    const words=p.label.split(' '), lh=fs*1.3;
+    if(words.length===1||r<28){
+      ctx.fillText(p.label,x,y,r*1.75);
+    } else {
+      const m=Math.ceil(words.length/2);
+      ctx.fillText(words.slice(0,m).join(' '),x,y-lh/2,r*1.75);
+      ctx.fillText(words.slice(m).join(' '),  x,y+lh/2,r*1.75);
+    }
+    ctx.restore();
+  }
+}
+
+function lighten(h,a){const c=H2R(h);return`rgb(${~~Math.min(255,c.r+255*a)},${~~Math.min(255,c.g+255*a)},${~~Math.min(255,c.b+255*a)})`;}
+function darken(h,a) {const c=H2R(h);return`rgb(${~~Math.max(0,c.r-255*a)},${~~Math.max(0,c.g-255*a)},${~~Math.max(0,c.b-255*a)})`;}
+function H2R(h){const r=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h);return r?{r:parseInt(r[1],16),g:parseInt(r[2],16),b:parseInt(r[3],16)}:{r:0,g:0,b:0};}
+
+// ── hit test ──────────────────────────────────────────────
+function hit(xPx,yPx){
+  const ps = plants();
+  for(let i=ps.length-1;i>=0;i--){
+    const p=ps[i],px=p.x_in*pxPerIn,py=p.y_in*pxPerIn,pr=p.r_in*pxPerIn;
+    if((xPx-px)**2+(yPx-py)**2<=pr*pr) return i;
+  }
+  return -1;
+}
+
+// ── canvas events ─────────────────────────────────────────
+canvas.addEventListener('mousedown', e=>{
+  const {x,y} = pos(e);
+  const b = bed();
+
+  if (mode === 'edit') {
+    const i = hit(x,y); if (i>=0) openModal(i); return;
+  }
+  if (mode === 'delete') {
+    const i = hit(x,y);
+    if (i>=0){ saveH(); b.plants.splice(i,1); hoverIdx=-1; renderAll(); } return;
+  }
+
+  // ── 'place' mode: smart gesture ──────────────────────────
+  const hitIdx = hit(x,y);
+  if (hitIdx >= 0) {
+    const p = b.plants[hitIdx];
+    gesture = {
+      type:'moving', startX:x, startY:y, plantIdx:hitIdx,
+      liveX_in:p.x_in, liveY_in:p.y_in,
+      offX:x - p.x_in*pxPerIn, offY:y - p.y_in*pxPerIn,
+    };
+    canvas.style.cursor = 'grabbing';
+  } else {
+    const s = snap(x,y);
+    gesture = {
+      type:'pending', startX:x, startY:y, plantIdx:-1,
+      liveX_in: Math.max(radius_in, Math.min(b.w_in-radius_in, s.x/pxPerIn)),
+      liveY_in: Math.max(radius_in, Math.min(b.h_in-radius_in, s.y/pxPerIn)),
+      liveR_in: radius_in,
+    };
+  }
+});
+
+canvas.addEventListener('mousemove', e=>{
+  const {x,y} = pos(e);
+  const b = bed();
+
+  if (mode === 'delete') {
+    const i = hit(x,y);
+    if (i !== hoverIdx){ hoverIdx=i; renderAll(); }
+    return;
+  }
+
+  if (!gesture) return;
+
+  if (gesture.type === 'moving') {
+    const s = snap(x - gesture.offX, y - gesture.offY);
+    const p = b.plants[gesture.plantIdx];
+    p.x_in = Math.max(p.r_in, Math.min(b.w_in-p.r_in, s.x/pxPerIn));
+    p.y_in = Math.max(p.r_in, Math.min(b.h_in-p.r_in, s.y/pxPerIn));
+    renderAll(); return;
+  }
+
+  if (gesture.type === 'pending' || gesture.type === 'sizing') {
+    const dx = x - gesture.startX, dy = y - gesture.startY;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (gesture.type === 'pending' && dist < DRAG_THRESHOLD) return;
+    gesture.type = 'sizing';
+    canvas.style.cursor = 'crosshair';
+    const rawR = dist / pxPerIn;
+    const snappedR = snapOn
+      ? Math.max(1, Math.round(rawR / (GRID_IN/2)) * (GRID_IN/2))
+      : Math.max(1, rawR);
+    gesture.liveR_in = Math.min(snappedR, Math.min(b.w_in, b.h_in) / 2);
+    const r = gesture.liveR_in;
+    gesture.liveX_in = Math.max(r, Math.min(b.w_in-r, gesture.liveX_in));
+    gesture.liveY_in = Math.max(r, Math.min(b.h_in-r, gesture.liveY_in));
+    renderAll();
+    drawGhost(gesture.liveX_in, gesture.liveY_in, gesture.liveR_in, dist, x, y);
+  }
+});
+
+canvas.addEventListener('mouseup', ()=>{
+  if (!gesture) return;
+  const b = bed();
+  if (gesture.type === 'moving') {
+    saveH(); gesture = null; setCanvasCursor(); return;
+  }
+  if (gesture.type === 'sizing') {
+    saveH();
+    b.plants.push({ x_in:gesture.liveX_in, y_in:gesture.liveY_in, r_in:gesture.liveR_in, color, label: activeProfileIdx >= 0 ? profiles[activeProfileIdx].name : '' });
+    radius_in = gesture.liveR_in;
+    sldr.value = Math.round(radius_in);
+    updateSizeUI();
+    gesture = null; renderAll(); return;
+  }
+  if (gesture.type === 'pending') {
+    saveH();
+    b.plants.push({ x_in:gesture.liveX_in, y_in:gesture.liveY_in, r_in:radius_in, color, label: activeProfileIdx >= 0 ? profiles[activeProfileIdx].name : '' });
+    gesture = null; renderAll(); return;
+  }
+  gesture = null;
+});
+
+canvas.addEventListener('mouseleave', ()=>{
+  if (gesture && (gesture.type === 'moving' || gesture.type === 'sizing')) {
+    gesture = null; renderAll(); setCanvasCursor();
+  } else { gesture = null; }
+  if (mode === 'delete' && hoverIdx !== -1){ hoverIdx=-1; renderAll(); }
+});
+
+// ── ghost preview during drag-size ────────────────────────
+function drawGhost(cx_in, cy_in, r_in, dist, cursorX, cursorY) {
+  const x=cx_in*pxPerIn, y=cy_in*pxPerIn, r=r_in*pxPerIn;
+  ctx.save();
+  ctx.globalAlpha=0.55;
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=color; ctx.fill();
+  ctx.restore();
+  ctx.save();
+  ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.strokeStyle=darken(color,.3); ctx.lineWidth=2; ctx.stroke();
+  ctx.restore();
+  ctx.save();
+  ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(cursorX,cursorY);
+  ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.restore();
+  const label=`${Math.round(r_in*2)}″ ⌀`, fs=12;
+  ctx.save();
+  ctx.font=`bold ${fs}px 'Lato',sans-serif`;
+  const tw=ctx.measureText(label).width, lx=cursorX+10, ly=cursorY-10;
+  ctx.fillStyle='rgba(58,42,26,.75)';
+  ctx.beginPath();
+  ctx.roundRect ? ctx.roundRect(lx-4,ly-fs,tw+8,fs+6,4) : ctx.rect(lx-4,ly-fs,tw+8,fs+6);
+  ctx.fill();
+  ctx.fillStyle='#fff'; ctx.textBaseline='alphabetic';
+  ctx.fillText(label,lx,ly);
+  ctx.restore();
+}
+
+// touch
+canvas.addEventListener('touchstart',e=>{e.preventDefault();canvas.dispatchEvent(new MouseEvent('mousedown',{clientX:e.touches[0].clientX,clientY:e.touches[0].clientY}));},{passive:false});
+canvas.addEventListener('touchmove', e=>{e.preventDefault();canvas.dispatchEvent(new MouseEvent('mousemove',{clientX:e.touches[0].clientX,clientY:e.touches[0].clientY}));},{passive:false});
+canvas.addEventListener('touchend',  e=>{e.preventDefault();canvas.dispatchEvent(new MouseEvent('mouseup'));},{passive:false});
+
+function pos(e){
+  const r=canvas.getBoundingClientRect();
+  return{x:(e.clientX-r.left)*(canvas.width/r.width),y:(e.clientY-r.top)*(canvas.height/r.height)};
+}
+
+function setCanvasCursor(){
+  canvas.classList.remove('canvas-delete');
+  if(mode==='place') canvas.style.cursor='crosshair';
+  else if(mode==='edit') canvas.style.cursor='pointer';
+  else if(mode==='delete'){canvas.classList.add('canvas-delete');canvas.style.cursor='';}
+}
+
+// ── modal ─────────────────────────────────────────────────
+let modalColor = null;
+
+function openModal(i){
+  editIdx=i;
+  modalColor=plants()[i].color;
+  document.getElementById('plantNameInput').value=plants()[i].label||'';
+  const box=document.getElementById('modalColorSwatches');
+  box.innerHTML='';
+  PLANT_COLORS.forEach(c=>{
+    const s=document.createElement('div');
+    s.className='swatch'+(c===modalColor?' selected':'');
+    s.style.background=c;
+    s.addEventListener('click',()=>{
+      modalColor=c;
+      box.querySelectorAll('.swatch').forEach(sw=>sw.classList.remove('selected'));
+      s.classList.add('selected');
+    });
+    box.appendChild(s);
+  });
+  document.getElementById('modalBackdrop').classList.add('open');
+  setTimeout(()=>document.getElementById('plantNameInput').focus(),50);
+}
+function closeModal(){document.getElementById('modalBackdrop').classList.remove('open');editIdx=null;modalColor=null;}
+function saveLabel(){
+  if(editIdx!==null){
+    saveH();
+    plants()[editIdx].label=document.getElementById('plantNameInput').value.trim();
+    if(modalColor) plants()[editIdx].color=modalColor;
+    renderAll(); closeModal();
+  }
+}
+document.getElementById('plantNameInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveLabel();if(e.key==='Escape')closeModal();});
+document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target===document.getElementById('modalBackdrop'))closeModal();});
+
+// ── clear ─────────────────────────────────────────────────
+function clearAll(){
+  if(!plants().length) return;
+  if(confirm('Clear all plants in this bed?')){saveH();bed().plants=[];renderAll();}
+}
+
+// ── mode buttons ──────────────────────────────────────────
+const HINTS = {
+  place:  'Click soil to place · Drag from soil to size · Click plant to move',
+  edit:   'Label: click a plant to name, rename, or recolor it',
+  delete: 'Delete: click any plant to remove it · hover to preview',
+};
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    mode=btn.dataset.mode;
+    hoverIdx=-1;
+    gesture=null;
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    canvas.classList.remove('canvas-delete');
+    setCanvasCursor();
+    if(mode==='delete') canvas.classList.add('canvas-delete');
+    document.getElementById('hintText').textContent=HINTS[mode]||'';
+    renderAll();
+  });
+});
+
+// ── size slider ───────────────────────────────────────────
+const sldr=document.getElementById('sizeSlider');
+const sc=document.getElementById('sizeCircle');
+const dd=document.getElementById('dimDisplay');
+function updateSizeUI(){
+  radius_in=parseInt(sldr.value);
+  const d=radius_in*2;
+  const disPx=Math.min(50,d*pxPerIn*1.1);
+  sc.style.width=disPx+'px'; sc.style.height=disPx+'px';
+  dd.textContent=`${d}″ diameter`;
+}
+sldr.addEventListener('input',updateSizeUI);
+
+// ── snap toggle ───────────────────────────────────────────
+document.getElementById('snapToggle').addEventListener('change',e=>{snapOn=e.target.checked;});
+
+// ── colour swatches ───────────────────────────────────────
+const swatchBox=document.getElementById('colorSwatches');
+PLANT_COLORS.forEach(c=>{
+  const s=document.createElement('div');
+  s.className='swatch'+(c===color?' selected':'');
+  s.style.background=c;
+  s.addEventListener('click',()=>{
+    color=c;
+    document.querySelectorAll('.swatch').forEach(sw=>sw.classList.remove('selected'));
+    s.classList.add('selected');
+    // deactivate profile if color changed manually
+    activeProfileIdx=-1;
+    renderProfilesList();
+  });
+  swatchBox.appendChild(s);
+});
+
+function setColor(c){
+  color=c;
+  document.querySelectorAll('.swatch').forEach(sw=>{
+    sw.classList.toggle('selected', sw.style.background===hexToRgbStr(c) || sw.style.background===c);
+  });
+}
+function hexToRgbStr(hex){const {r,g,b}=H2R(hex);return`rgb(${r}, ${g}, ${b})`;}
+
+// ── plant profiles ────────────────────────────────────────
+function renderProfilesList(){
+  const list=document.getElementById('profilesList');
+  list.innerHTML='';
+  if(!profiles.length){
+    list.innerHTML='<div style="font-size:.7rem;color:var(--text-light);font-style:italic;padding:.2rem .1rem;">No profiles yet</div>';
+    return;
+  }
+  profiles.forEach((p,i)=>{
+    const row=document.createElement('div');
+    row.className='profile-item'+(i===activeProfileIdx?' active-profile':'');
+    row.innerHTML=`<div class="profile-dot" style="background:${p.color}"></div><span class="profile-name">${p.name}</span><span style="font-size:.68rem;color:var(--text-light);margin-right:.15rem">${p.r_in*2}″</span><span class="profile-del" title="Delete profile">✕</span>`;
+    row.querySelector('.profile-del').addEventListener('click',e=>{e.stopPropagation();profiles.splice(i,1);if(activeProfileIdx===i)activeProfileIdx=-1;else if(activeProfileIdx>i)activeProfileIdx--;renderProfilesList();});
+    row.addEventListener('click',()=>{
+      activeProfileIdx=i;
+      color=p.color;
+      radius_in=p.r_in;
+      sldr.value=p.r_in;
+      setColor(p.color);
+      updateSizeUI();
+      renderProfilesList();
+    });
+    list.appendChild(row);
+  });
+}
+
+document.getElementById('btnSaveProfile').addEventListener('click',()=>{
+  const nm=document.getElementById('profileNameInput').value.trim();
+  if(!nm) return;
+  profiles.push({name:nm, color, r_in:radius_in});
+  document.getElementById('profileNameInput').value='';
+  activeProfileIdx=profiles.length-1;
+  renderProfilesList();
+});
+
+// ── undo / redo buttons ───────────────────────────────────
+document.getElementById('btnUndo').addEventListener('click', undo);
+document.getElementById('btnRedo').addEventListener('click', redo);
+
+// keyboard shortcuts
+let modeBeforeCtrl = null;
+
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.ctrlKey && e.key==='z'){e.preventDefault(); undo(); return;}
+  if(e.ctrlKey && (e.key==='y' || (e.shiftKey && e.key==='Z'))){e.preventDefault(); redo(); return;}
+  if(e.key==='Control' && mode !== 'delete' && modeBeforeCtrl === null){
+    modeBeforeCtrl = mode;
+    mode = 'delete';
+    gesture = null;
+    hoverIdx = -1;
+    canvas.classList.add('canvas-delete');
+    canvas.style.cursor = '';
+    document.getElementById('btnDeleteMode').classList.add('active');
+  }
+});
+
+document.addEventListener('keyup', e=>{
+  if(e.key==='Control' && modeBeforeCtrl !== null){
+    mode = modeBeforeCtrl;
+    modeBeforeCtrl = null;
+    hoverIdx = -1;
+    canvas.classList.remove('canvas-delete');
+    document.getElementById('btnDeleteMode').classList.remove('active');
+    setCanvasCursor();
+    renderAll();
+  }
+});
+
+// ── PNG export (active bed only) ─────────────────────────
+function exportPNG(){
+  // create a composite canvas with soil background + grid + plants
+  const off=document.createElement('canvas');
+  off.width=canvas.width; off.height=canvas.height;
+  const oc=off.getContext('2d');
+  // soil fill
+  oc.fillStyle='#8B6347';
+  oc.fillRect(0,0,off.width,off.height);
+  // draw grid overlay
+  oc.drawImage(gridCv,0,0);
+  // draw plants
+  oc.drawImage(canvas,0,0);
+  // download
+  const link=document.createElement('a');
+  link.download=`${bed().name.replace(/\s+/g,'_')}.png`;
+  link.href=off.toDataURL('image/png');
+  link.click();
+}
+
+// ── print with legend ─────────────────────────────────────
+function buildLegendAndPrint(){
+  // collect all unique labeled plants from ALL beds
+  const seen=new Map(); // label+color key → {label, color}
+  beds.forEach(b=>{
+    b.plants.forEach(p=>{
+      if(p.label){
+        const key=p.label+'||'+p.color;
+        if(!seen.has(key)) seen.set(key,{label:p.label,color:p.color});
+      }
+    });
+  });
+  // also include unlabeled by color
+  beds.forEach(b=>{
+    b.plants.forEach(p=>{
+      if(!p.label){
+        const key='(unlabeled)'+'||'+p.color;
+        if(!seen.has(key)) seen.set(key,{label:'(unlabeled)',color:p.color});
+      }
+    });
+  });
+
+  const grid=document.getElementById('legendGrid');
+  grid.innerHTML='';
+  seen.forEach(item=>{
+    const el=document.createElement('div');
+    el.className='legend-item';
+    el.innerHTML=`<div class="legend-dot" style="background:${item.color}"></div><span>${item.label}</span>`;
+    grid.appendChild(el);
+  });
+
+  document.getElementById('printLegend').style.display = seen.size ? 'block' : 'none';
+  setTimeout(()=>window.print(), 80);
+}
+
+// ── save JSON ─────────────────────────────────────────────
+function saveJSON(){
+  // strip internal undo stacks before saving
+  const exportBeds = beds.map(b=>({
+    name: b.name,
+    w_in: b.w_in,
+    h_in: b.h_in,
+    plants: b.plants,
+  }));
+  const data = {
+    version: 1,
+    beds: exportBeds,
+    profiles,
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const link=document.createElement('a');
+  link.download='garden_layout.json';
+  link.href=URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+// ── load JSON ─────────────────────────────────────────────
+function loadJSON(event){
+  const file=event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try {
+      const data=JSON.parse(e.target.result);
+      if(!data.beds || !Array.isArray(data.beds)) throw new Error('Invalid format');
+      beds = data.beds.map(b=>makeBedFromData(b));
+      profiles = Array.isArray(data.profiles) ? data.profiles : [];
+      activeBedIdx=0;
+      activeProfileIdx=-1;
+      renderTabs();
+      renderProfilesList();
+      switchBed(0);
+    } catch(err){
+      alert('Could not load file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  // reset input so same file can be reloaded
+  event.target.value='';
+}
+
+function makeBedFromData(d){
+  const b=makeBed(d.name||'Bed', d.w_in||72, d.h_in||144);
+  b.plants=(d.plants||[]).map(p=>({...p}));
+  return b;
+}
+
+// ── zoom controls ─────────────────────────────────────────
+document.getElementById('btnZoomIn').addEventListener('click', () => setZoom(zoom + ZOOM_STEP));
+document.getElementById('btnZoomOut').addEventListener('click', () => setZoom(zoom - ZOOM_STEP));
+document.getElementById('btnZoomReset').addEventListener('click', () => setZoom(1.0));
+
+// Scroll wheel zooms; scrollbars handle panning.
+document.getElementById('bedViewport').addEventListener('wheel', e => {
+  e.preventDefault();
+  setZoom(zoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+}, { passive: false });
+
+// ── init ──────────────────────────────────────────────────
+renderTabs();
+renderProfilesList();
+window.addEventListener('resize',resize);
+resize();
+</script>
+</body>
+</html>
