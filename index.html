@@ -178,6 +178,7 @@
   .bed-viewport::-webkit-scrollbar-thumb{background:var(--cream-dark);border-radius:4px;}
   .bed-viewport::-webkit-scrollbar-corner{background:transparent;}
   .bed-scaler{display:inline-block;transform-origin:top left;}
+  .bed-viewport.panning{user-select:none;cursor:grabbing !important;}
   .bed-name-input{
     font-family:'Playfair Display',serif;font-style:italic;font-size:1rem;
     border:none;border-bottom:2px dashed var(--cream-dark);background:transparent;
@@ -185,7 +186,19 @@
     transition:border-color .15s;
   }
   .bed-name-input:focus{border-bottom-color:var(--sage);}
-  .bed-dims{font-size:.7rem;color:var(--text-light);}
+  .bed-dims{font-size:.7rem;color:var(--text-light);display:flex;align-items:center;gap:.25rem;}
+  .bed-dims label{display:flex;align-items:center;gap:.25rem;cursor:default;}
+  .bed-dims input[type=number]{
+    width:3.2rem;padding:.15rem .2rem;
+    border:1.5px solid var(--cream-dark);border-radius:5px;
+    font-family:'Lato',sans-serif;font-size:.7rem;
+    color:var(--text);background:var(--cream);
+    text-align:center;outline:none;
+    -moz-appearance:textfield;
+  }
+  .bed-dims input[type=number]:focus{border-color:var(--sage);}
+  .bed-dims input[type=number]::-webkit-inner-spin-button,
+  .bed-dims input[type=number]::-webkit-outer-spin-button{opacity:1;}
 
   /* rulers */
   .ruler-row{display:flex;align-items:flex-start;}
@@ -317,7 +330,11 @@
   <div class="bed-wrapper">
     <div class="bed-name-row">
       <input class="bed-name-input" id="bedNameInput" value="Bed 1" maxlength="32">
-      <span class="bed-dims" id="bedDimsLabel"></span>
+      <span class="bed-dims">
+        <label>W <input type="number" id="bedWidthInput"  min="1" max="50" step="1"> ft</label>
+        &nbsp;×&nbsp;
+        <label>H <input type="number" id="bedHeightInput" min="1" max="50" step="1"> ft</label>
+      </span>
       <div class="zoom-controls">
         <button class="zoom-btn" id="btnZoomOut" title="Zoom out (scroll wheel)">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -429,6 +446,12 @@ const MAX_ZOOM  = 4.0;
 const ZOOM_STEP = 0.25;
 const FRAME_PAD = 26; // bed-frame padding: 13px × 2
 
+// ── pan state ─────────────────────────────────────────────
+let panActive  = false;
+let spaceDown  = false;
+let panStartX  = 0, panStartY  = 0;
+let panScrollL = 0, panScrollT = 0;
+
 // ── shortcuts to active bed ───────────────────────────────
 function bed()  { return beds[activeBedIdx]; }
 function plants(){ return beds[activeBedIdx].plants; }
@@ -441,11 +464,19 @@ const gCtx     = gridCv.getContext('2d');
 const bedInner = document.getElementById('bedInner');
 
 // ── history helpers (per bed) ─────────────────────────────
+function bedSnap(b) {
+  return JSON.stringify({ plants: b.plants, w_in: b.w_in, h_in: b.h_in });
+}
+function applySnap(b, snap) {
+  b.plants = snap.plants;
+  b.w_in   = snap.w_in;
+  b.h_in   = snap.h_in;
+}
 function saveH() {
   const b = bed();
-  if (!b._hist) b._hist = [];
+  if (!b._hist)   b._hist   = [];
   if (!b._future) b._future = [];
-  b._hist.push(JSON.stringify(b.plants));
+  b._hist.push(bedSnap(b));
   if (b._hist.length > 60) b._hist.shift();
   b._future = [];
 }
@@ -453,15 +484,19 @@ function undo() {
   const b = bed();
   if (!b._hist || !b._hist.length) return;
   if (!b._future) b._future = [];
-  b._future.push(JSON.stringify(b.plants));
-  b.plants = JSON.parse(b._hist.pop());
+  b._future.push(bedSnap(b));
+  applySnap(b, JSON.parse(b._hist.pop()));
+  syncBedDimInputs();
+  resize();
   renderAll();
 }
 function redo() {
   const b = bed();
   if (!b._future || !b._future.length) return;
-  b._hist.push(JSON.stringify(b.plants));
-  b.plants = JSON.parse(b._future.pop());
+  b._hist.push(bedSnap(b));
+  applySnap(b, JSON.parse(b._future.pop()));
+  syncBedDimInputs();
+  resize();
   renderAll();
 }
 
@@ -494,6 +529,7 @@ function switchBed(i) {
   hoverIdx = -1;
   gesture = null;
   document.getElementById('bedNameInput').value = bed().name;
+  syncBedDimInputs();
   renderTabs();
   resize();
 }
@@ -518,6 +554,37 @@ document.getElementById('bedNameInput').addEventListener('input', e => {
   renderTabs();
 });
 
+function clampPlants(b) {
+  b.plants.forEach(p => {
+    p.x_in = Math.max(p.r_in, Math.min(b.w_in - p.r_in, p.x_in));
+    p.y_in = Math.max(p.r_in, Math.min(b.h_in - p.r_in, p.y_in));
+  });
+}
+
+function syncBedDimInputs() {
+  const b = bed();
+  document.getElementById('bedWidthInput').value  = b.w_in / 12;
+  document.getElementById('bedHeightInput').value = b.h_in / 12;
+}
+
+function onDimChange() {
+  const wFt = parseFloat(document.getElementById('bedWidthInput').value);
+  const hFt = parseFloat(document.getElementById('bedHeightInput').value);
+  if (!Number.isFinite(wFt) || !Number.isFinite(hFt)) return;
+  const wIn = Math.round(Math.max(12, Math.min(600, wFt)) * 12);
+  const hIn = Math.round(Math.max(12, Math.min(600, hFt)) * 12);
+  const b = bed();
+  if (b.w_in === wIn && b.h_in === hIn) return;
+  saveH();
+  b.w_in = wIn;
+  b.h_in = hIn;
+  clampPlants(b);
+  resize();
+}
+
+document.getElementById('bedWidthInput') .addEventListener('change', onDimChange);
+document.getElementById('bedHeightInput').addEventListener('change', onDimChange);
+
 // ── resize ────────────────────────────────────────────────
 function resize() {
   const b = bed();
@@ -527,8 +594,7 @@ function resize() {
   const bedWrap = document.querySelector('.bed-wrapper');
   const rulerLeftW = 28;
   const avW = Math.max(100, bedWrap.clientWidth - rulerLeftW - FRAME_PAD - 4);
-  const avH = window.innerHeight * 0.78;
-  baseCanvasW = Math.round(Math.min(avW, avH / aspect));
+  baseCanvasW = Math.round(avW);
   baseCanvasH = Math.round(baseCanvasW * aspect);
   applyZoom();
 }
@@ -546,9 +612,7 @@ function applyZoom() {
   gridCv.style.width  = baseCanvasW + 'px';
   gridCv.style.height = baseCanvasH + 'px';
   pxPerIn = baseCanvasW / b.w_in;
-
-  document.getElementById('bedDimsLabel').textContent =
-    `${b.w_in/12} ft × ${b.h_in/12} ft`;
+  syncBedDimInputs();
 
   // Build content at base size first so the scaler has correct dimensions.
   buildRulers();
@@ -728,6 +792,17 @@ function hit(xPx,yPx){
 
 // ── canvas events ─────────────────────────────────────────
 canvas.addEventListener('mousedown', e=>{
+  // Space+left-drag initiates a pan — skip all plant interactions.
+  if (spaceDown && e.button === 0) {
+    e.preventDefault();
+    const vp = document.getElementById('bedViewport');
+    panActive = true;
+    panStartX = e.clientX; panStartY = e.clientY;
+    panScrollL = vp.scrollLeft; panScrollT = vp.scrollTop;
+    vp.classList.add('panning');
+    return;
+  }
+
   const {x,y} = pos(e);
   const b = bed();
 
@@ -1025,6 +1100,11 @@ document.addEventListener('keydown', e=>{
   if(e.target.tagName==='INPUT') return;
   if(e.ctrlKey && e.key==='z'){e.preventDefault(); undo(); return;}
   if(e.ctrlKey && (e.key==='y' || (e.shiftKey && e.key==='Z'))){e.preventDefault(); redo(); return;}
+  if(e.key===' ' && !e.ctrlKey && !e.altKey){
+    e.preventDefault(); // prevent page scroll
+    if(!spaceDown){ spaceDown=true; if(!panActive) canvas.style.cursor='grab'; }
+    return;
+  }
   if(e.key==='Control' && mode !== 'delete' && modeBeforeCtrl === null){
     modeBeforeCtrl = mode;
     mode = 'delete';
@@ -1037,6 +1117,12 @@ document.addEventListener('keydown', e=>{
 });
 
 document.addEventListener('keyup', e=>{
+  if(e.key===' '){
+    spaceDown=false;
+    if(panActive){ panActive=false; document.getElementById('bedViewport').classList.remove('panning'); }
+    setCanvasCursor();
+    return;
+  }
   if(e.key==='Control' && modeBeforeCtrl !== null){
     mode = modeBeforeCtrl;
     modeBeforeCtrl = null;
@@ -1161,17 +1247,48 @@ document.getElementById('btnZoomIn').addEventListener('click', () => setZoom(zoo
 document.getElementById('btnZoomOut').addEventListener('click', () => setZoom(zoom - ZOOM_STEP));
 document.getElementById('btnZoomReset').addEventListener('click', () => setZoom(1.0));
 
-// Scroll wheel zooms; scrollbars handle panning.
+// Scroll wheel zooms; middle-mouse drag / Space+drag handles panning.
 document.getElementById('bedViewport').addEventListener('wheel', e => {
   e.preventDefault();
   setZoom(zoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
 }, { passive: false });
+
+// ── pan: middle-mouse drag on viewport ────────────────────
+{
+  const vp = document.getElementById('bedViewport');
+
+  vp.addEventListener('mousedown', e => {
+    if (e.button !== 1) return;
+    e.preventDefault(); // suppress browser auto-scroll arrow cursor
+    panActive = true;
+    panStartX = e.clientX; panStartY = e.clientY;
+    panScrollL = vp.scrollLeft; panScrollT = vp.scrollTop;
+    vp.classList.add('panning');
+  });
+
+  // Shared move/up on document so dragging outside the viewport still works.
+  document.addEventListener('mousemove', e => {
+    if (!panActive) return;
+    vp.scrollLeft = panScrollL - (e.clientX - panStartX);
+    vp.scrollTop  = panScrollT - (e.clientY - panStartY);
+  });
+
+  document.addEventListener('mouseup', e => {
+    if (!panActive) return;
+    if (e.button === 1 || e.button === 0) {
+      panActive = false;
+      vp.classList.remove('panning');
+      setCanvasCursor();
+    }
+  });
+}
 
 // ── init ──────────────────────────────────────────────────
 renderTabs();
 renderProfilesList();
 window.addEventListener('resize',resize);
 resize();
+syncBedDimInputs();
 </script>
 </body>
 </html>
