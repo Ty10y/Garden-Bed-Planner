@@ -20,7 +20,8 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{
-    font-family:'Lato',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;
+    font-family:'Lato',sans-serif;background:var(--cream);color:var(--text);
+    height:100vh;overflow:hidden;display:flex;flex-direction:column;
     background-image:
       radial-gradient(ellipse at 10% 20%,rgba(122,158,126,.15) 0%,transparent 50%),
       radial-gradient(ellipse at 90% 80%,rgba(184,169,201,.15) 0%,transparent 50%),
@@ -65,10 +66,11 @@
   /* ── page layout ── */
   .app-layout{
     display:flex;gap:1.4rem;
-    padding:.8rem 1.4rem 2rem;
-    max-width:1300px;margin:0 auto;
+    padding:.8rem 1.4rem 1rem;
+    max-width:1300px;margin:0 auto;width:100%;
     align-items:flex-start;
     justify-content:center;
+    flex:1;min-height:0;overflow:hidden;
   }
 
   /* ── toolbar ── */
@@ -149,7 +151,7 @@
   .btn-load:hover{background:var(--cream-dark);}
 
   /* ── bed wrapper ── */
-  .bed-wrapper{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;}
+  .bed-wrapper{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;min-height:0;overflow:hidden;}
   .bed-name-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap;}
 
   /* ── zoom controls ── */
@@ -171,6 +173,7 @@
   /* ── bed viewport / scaler ── */
   .bed-viewport{
     overflow:auto;max-width:100%;position:relative;
+    flex:1;min-height:0;
     scrollbar-width:thin;scrollbar-color:var(--cream-dark) transparent;
   }
   .bed-viewport::-webkit-scrollbar{width:8px;height:8px;}
@@ -571,8 +574,8 @@ function onDimChange() {
   const wFt = parseFloat(document.getElementById('bedWidthInput').value);
   const hFt = parseFloat(document.getElementById('bedHeightInput').value);
   if (!Number.isFinite(wFt) || !Number.isFinite(hFt)) return;
-  const wIn = Math.round(Math.max(12, Math.min(600, wFt)) * 12);
-  const hIn = Math.round(Math.max(12, Math.min(600, hFt)) * 12);
+  const wIn = Math.round(Math.max(1, Math.min(50, wFt)) * 12);
+  const hIn = Math.round(Math.max(1, Math.min(50, hFt)) * 12);
   const b = bed();
   if (b.w_in === wIn && b.h_in === hIn) return;
   saveH();
@@ -592,9 +595,11 @@ function resize() {
   // Use .bed-wrapper (flex:1 item) for a stable reference that doesn't
   // feed back into itself the way bed-frame.clientWidth did.
   const bedWrap = document.querySelector('.bed-wrapper');
-  const rulerLeftW = 28;
-  const avW = Math.max(100, bedWrap.clientWidth - rulerLeftW - FRAME_PAD - 4);
-  baseCanvasW = Math.round(avW);
+  const viewport = document.getElementById('bedViewport');
+  const rulerSz = 28; // ruler width (left) and height (top)
+  const avW = Math.max(100, bedWrap.clientWidth  - rulerSz - FRAME_PAD - 4);
+  const avH = Math.max(100, (viewport.clientHeight || window.innerHeight * 0.7) - rulerSz - FRAME_PAD - 4);
+  baseCanvasW = Math.round(Math.min(avW, avH / aspect));
   baseCanvasH = Math.round(baseCanvasW * aspect);
   applyZoom();
 }
@@ -792,6 +797,7 @@ function hit(xPx,yPx){
 
 // ── canvas events ─────────────────────────────────────────
 canvas.addEventListener('mousedown', e=>{
+  if (e.button !== 0) return; // only left-click interacts with plants
   // Space+left-drag initiates a pan — skip all plant interactions.
   if (spaceDown && e.button === 0) {
     e.preventDefault();
