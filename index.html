@@ -681,27 +681,32 @@ function renderAll(){
   ctx.restore();
 }
 
+function cloudPath(ctx, cx, cy, r) {
+  const n = 8, amp = r * 0.08, steps = n * 16;
+  ctx.beginPath();
+  for (let i = 0; i <= steps; i++) {
+    const a = (i / steps) * Math.PI * 2;
+    const rr = r + amp * Math.sin(n * a);
+    const px = cx + rr * Math.cos(a), py = cy + rr * Math.sin(a);
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+}
+
 function drawPlant(p, deleteHover){
   const r=p.r_in*pxPerIn, x=p.x_in*pxPerIn, y=p.y_in*pxPerIn;
   ctx.globalAlpha = 1;
   ctx.save();
   ctx.shadowColor='rgba(0,0,0,.28)'; ctx.shadowBlur=6; ctx.shadowOffsetY=3;
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  cloudPath(ctx,x,y,r);
   ctx.fillStyle = deleteHover ? 'rgba(180,40,40,.55)' : p.color;
   ctx.fill();
   ctx.restore();
   ctx.save(); ctx.setLineDash([4,3]);
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  cloudPath(ctx,x,y,r);
   ctx.strokeStyle = deleteHover ? '#C94040' : darken(p.color,.22);
   ctx.lineWidth=deleteHover?2.5:1.5; ctx.stroke();
   ctx.restore();
-  if (r>20 && !deleteHover) {
-    ctx.save();
-    ctx.translate(x+r*.54,y-r*.54); ctx.rotate(-Math.PI/4);
-    ctx.fillStyle=darken(p.color,.28);
-    ctx.beginPath(); ctx.ellipse(0,0,r*.13,r*.22,0,0,Math.PI*2); ctx.fill();
-    ctx.restore();
-  }
   if (deleteHover) {
     ctx.save();
     ctx.strokeStyle='#fff'; ctx.lineWidth=Math.max(2,r*.12); ctx.lineCap='round';
