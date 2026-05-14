@@ -20,7 +20,8 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{
-    font-family:'Lato',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;
+    font-family:'Lato',sans-serif;background:var(--cream);color:var(--text);
+    height:100vh;overflow:hidden;display:flex;flex-direction:column;
     background-image:
       radial-gradient(ellipse at 10% 20%,rgba(122,158,126,.15) 0%,transparent 50%),
       radial-gradient(ellipse at 90% 80%,rgba(184,169,201,.15) 0%,transparent 50%),
@@ -65,10 +66,11 @@
   /* ── page layout ── */
   .app-layout{
     display:flex;gap:1.4rem;
-    padding:.8rem 1.4rem 2rem;
-    max-width:1300px;margin:0 auto;
-    align-items:flex-start;
+    padding:.8rem 1.4rem 1rem;
+    max-width:1300px;margin:0 auto;width:100%;
+    align-items:stretch;
     justify-content:center;
+    flex:1;min-height:0;overflow:hidden;
   }
 
   /* ── toolbar ── */
@@ -77,6 +79,7 @@
     padding:1rem;min-width:220px;max-width:220px;
     box-shadow:3px 3px 0 var(--cream-dark);position:sticky;top:.5rem;flex-shrink:0;
     max-height:calc(100vh - 1rem);overflow-y:auto;overflow-x:hidden;
+    align-self:flex-start;
   }
   .toolbar h3{font-family:'Playfair Display',serif;font-size:.88rem;color:var(--moss);margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px dashed var(--cream-dark);display:flex;align-items:center;gap:.4rem;}
   .tool-section{margin-bottom:.9rem;}
@@ -149,7 +152,7 @@
   .btn-load:hover{background:var(--cream-dark);}
 
   /* ── bed wrapper ── */
-  .bed-wrapper{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;}
+  .bed-wrapper{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;min-height:0;overflow:hidden;}
   .bed-name-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap;}
 
   /* ── zoom controls ── */
@@ -170,14 +173,11 @@
 
   /* ── bed viewport / scaler ── */
   .bed-viewport{
-    overflow:auto;max-width:100%;position:relative;
+    overflow:hidden;position:relative;
+    flex:1;min-height:0;width:100%;
     scrollbar-width:thin;scrollbar-color:var(--cream-dark) transparent;
   }
-  .bed-viewport::-webkit-scrollbar{width:8px;height:8px;}
-  .bed-viewport::-webkit-scrollbar-track{background:transparent;}
-  .bed-viewport::-webkit-scrollbar-thumb{background:var(--cream-dark);border-radius:4px;}
-  .bed-viewport::-webkit-scrollbar-corner{background:transparent;}
-  .bed-scaler{display:inline-block;transform-origin:top left;}
+  .bed-viewport canvas{position:absolute;top:0;left:0;display:block;}
   .bed-name-input{
     font-family:'Playfair Display',serif;font-style:italic;font-size:1rem;
     border:none;border-bottom:2px dashed var(--cream-dark);background:transparent;
@@ -185,23 +185,20 @@
     transition:border-color .15s;
   }
   .bed-name-input:focus{border-bottom-color:var(--sage);}
-  .bed-dims{font-size:.7rem;color:var(--text-light);}
+  .bed-dims{font-size:.7rem;color:var(--text-light);display:flex;align-items:center;gap:.25rem;}
+  .bed-dims label{display:flex;align-items:center;gap:.25rem;cursor:default;}
+  .bed-dims input[type=number]{
+    width:3.2rem;padding:.15rem .2rem;
+    border:1.5px solid var(--cream-dark);border-radius:5px;
+    font-family:'Lato',sans-serif;font-size:.7rem;
+    color:var(--text);background:var(--cream);
+    text-align:center;outline:none;
+    -moz-appearance:textfield;
+  }
+  .bed-dims input[type=number]:focus{border-color:var(--sage);}
+  .bed-dims input[type=number]::-webkit-inner-spin-button,
+  .bed-dims input[type=number]::-webkit-outer-spin-button{opacity:1;}
 
-  /* rulers */
-  .ruler-row{display:flex;align-items:flex-start;}
-  .ruler-corner{flex-shrink:0;}
-  .ruler-top{display:flex;font-family:'Playfair Display',serif;font-style:italic;font-size:.6rem;color:var(--text-light);}
-  .ruler-top-cell{border-left:1px solid var(--cream-dark);display:flex;align-items:flex-end;padding-bottom:2px;padding-left:2px;flex-shrink:0;}
-  .ruler-left{flex-shrink:0;font-family:'Playfair Display',serif;font-style:italic;font-size:.6rem;color:var(--text-light);display:flex;flex-direction:column;}
-  .ruler-left-cell{border-top:1px solid var(--cream-dark);display:flex;align-items:flex-start;justify-content:flex-end;padding-right:3px;padding-top:1px;flex-shrink:0;}
-
-  /* bed frame */
-  .bed-frame{background:var(--wood);border-radius:10px;padding:13px;box-shadow:0 0 0 5px var(--wood-dark),5px 8px 26px rgba(0,0,0,.28),inset 0 2px 4px rgba(255,255,255,.1);position:relative;}
-  .bed-frame::before{content:'';position:absolute;inset:0;border-radius:10px;background:repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(0,0,0,.04) 40px,rgba(0,0,0,.04) 41px);pointer-events:none;}
-  .bed-inner{background:var(--soil);border-radius:5px;overflow:hidden;position:relative;
-    background-image:radial-gradient(ellipse at 20% 20%,rgba(160,120,90,.35) 0%,transparent 40%),radial-gradient(ellipse at 80% 75%,rgba(100,70,40,.28) 0%,transparent 40%),url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23704d30' fill-opacity='0.22'%3E%3Ccircle cx='5' cy='5' r='1.5'/%3E%3Ccircle cx='15' cy='12' r='1'/%3E%3Ccircle cx='25' cy='7' r='1.5'/%3E%3Ccircle cx='35' cy='18' r='1'/%3E%3Ccircle cx='10' cy='22' r='1.5'/%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3Ccircle cx='20' cy='35' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
-    cursor:crosshair;}
-  #gardenCanvas{display:block;width:100%;position:relative;z-index:1;}
   .hint{font-size:.71rem;color:#A0785A;font-style:italic;margin-top:.45rem;text-align:center;}
 
   /* ── modal ── */
@@ -225,13 +222,11 @@
 
   @media print{
     body{background:#fff;}
-    .toolbar,.bed-tabs-bar,header p,.deco,.hint,.ruler-top,.ruler-left,.ruler-corner,.bed-name-row{display:none!important;}
+    .toolbar,.bed-tabs-bar,header p,.deco,.hint,.bed-name-row{display:none!important;}
     header h1{color:#4E6B3C;}
     .app-layout{padding:0;justify-content:center;}
     .bed-wrapper{align-items:center;}
-    .bed-frame{box-shadow:none;border:3px solid #6B4423;}
     .modal-backdrop{display:none!important;}
-    .ruler-row{display:block;}
     .print-legend{display:block;margin-top:1.2rem;padding:0 .5rem;}
     .print-legend h4{font-family:'Playfair Display',serif;font-size:.95rem;color:#4E6B3C;margin-bottom:.5rem;border-bottom:1px solid #ccc;padding-bottom:.3rem;}
     .legend-grid{display:flex;flex-wrap:wrap;gap:.4rem .8rem;}
@@ -317,7 +312,11 @@
   <div class="bed-wrapper">
     <div class="bed-name-row">
       <input class="bed-name-input" id="bedNameInput" value="Bed 1" maxlength="32">
-      <span class="bed-dims" id="bedDimsLabel"></span>
+      <span class="bed-dims">
+        <label>W <input type="number" id="bedWidthInput"  min="1" max="50" step="1"> ft</label>
+        &nbsp;×&nbsp;
+        <label>H <input type="number" id="bedHeightInput" min="1" max="50" step="1"> ft</label>
+      </span>
       <div class="zoom-controls">
         <button class="zoom-btn" id="btnZoomOut" title="Zoom out (scroll wheel)">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -326,7 +325,7 @@
             <line x1="3.3" y1="5.8" x2="8.3" y2="5.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </button>
-        <button class="zoom-reset-btn" id="btnZoomReset" title="Reset zoom to 100%"><span id="zoomDisplay">100%</span></button>
+        <button class="zoom-reset-btn" id="btnZoomReset" title="Fit bed to window"><span id="zoomDisplay">100%</span></button>
         <button class="zoom-btn" id="btnZoomIn" title="Zoom in (scroll wheel)">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="5.8" cy="5.8" r="4" stroke="currentColor" stroke-width="1.5"/>
@@ -338,23 +337,8 @@
       </div>
     </div>
     <div class="bed-viewport" id="bedViewport">
-      <div class="bed-scaler" id="bedScaler">
-        <div class="ruler-row">
-          <div class="ruler-corner" id="rulerCorner"></div>
-          <div class="ruler-top"    id="rulerTop"></div>
-        </div>
-        <div class="ruler-row" style="align-items:stretch;">
-          <div class="ruler-left" id="rulerLeft"></div>
-          <div>
-            <div class="bed-frame">
-              <div class="bed-inner" id="bedInner">
-                <canvas id="gardenCanvas"></canvas>
-                <canvas id="gridCanvas"  style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <canvas id="gridCanvas"   style="pointer-events:none;"></canvas>
+      <canvas id="gardenCanvas" style="cursor:crosshair;"></canvas>
     </div>
     <div class="hint" id="hintText">Click soil to place · Drag from soil to size · Click plant to move</div>
 
@@ -413,39 +397,53 @@ let color     = PLANT_COLORS[0];
 let radius_in = 4;
 let snapOn    = true;
 let editIdx   = null;
-let pxPerIn   = 1;
 let hoverIdx  = -1;
 
+// Fixed logical scale: 10 canvas px = 1 inch. All drawing uses this.
+// cam.scale controls how many *screen* px equal 1 inch.
+const pxPerIn = 10;
+
+// ── camera ────────────────────────────────────────────────
+// cam.x/y = screen-pixel offset of the bed's top-left corner on the canvas.
+// cam.scale = screen pixels per inch (drives ctx.setTransform).
+let cam       = { x: 0, y: 0, scale: pxPerIn };
+let fitScale  = pxPerIn; // cam.scale value when bed fills viewport
+let animId    = null;    // requestAnimationFrame id for camera animation
+
 // ── unified place/move gesture ────────────────────────────
-const DRAG_THRESHOLD = 6; // px before committing to a resize gesture
+const DRAG_THRESHOLD = 6; // logical px before committing to a resize gesture
 let gesture = null;
-// gesture fields: type ('pending'|'sizing'|'moving'), startX/Y, plantIdx,
-//   liveX_in/liveY_in, liveR_in (sizing), offX/offY (moving)
-let zoom      = 1.0;
-let baseCanvasW = 0;
-let baseCanvasH = 0;
-const MIN_ZOOM  = 0.5;
-const MAX_ZOOM  = 4.0;
-const ZOOM_STEP = 0.25;
-const FRAME_PAD = 26; // bed-frame padding: 13px × 2
+
+// ── pan state ─────────────────────────────────────────────
+let panActive = false;
+let spaceDown = false;
+let panStartX = 0, panStartY = 0;
+let panCamX0  = 0, panCamY0  = 0;
 
 // ── shortcuts to active bed ───────────────────────────────
 function bed()  { return beds[activeBedIdx]; }
 function plants(){ return beds[activeBedIdx].plants; }
 
 // ── DOM refs ──────────────────────────────────────────────
-const canvas   = document.getElementById('gardenCanvas');
-const ctx      = canvas.getContext('2d');
-const gridCv   = document.getElementById('gridCanvas');
-const gCtx     = gridCv.getContext('2d');
-const bedInner = document.getElementById('bedInner');
+const canvas = document.getElementById('gardenCanvas');
+const ctx    = canvas.getContext('2d');
+const gridCv = document.getElementById('gridCanvas');
+const gCtx   = gridCv.getContext('2d');
 
 // ── history helpers (per bed) ─────────────────────────────
+function bedSnap(b) {
+  return JSON.stringify({ plants: b.plants, w_in: b.w_in, h_in: b.h_in });
+}
+function applySnap(b, snap) {
+  b.plants = snap.plants;
+  b.w_in   = snap.w_in;
+  b.h_in   = snap.h_in;
+}
 function saveH() {
   const b = bed();
-  if (!b._hist) b._hist = [];
+  if (!b._hist)   b._hist   = [];
   if (!b._future) b._future = [];
-  b._hist.push(JSON.stringify(b.plants));
+  b._hist.push(bedSnap(b));
   if (b._hist.length > 60) b._hist.shift();
   b._future = [];
 }
@@ -453,16 +451,22 @@ function undo() {
   const b = bed();
   if (!b._hist || !b._hist.length) return;
   if (!b._future) b._future = [];
-  b._future.push(JSON.stringify(b.plants));
-  b.plants = JSON.parse(b._hist.pop());
-  renderAll();
+  const prevW = b.w_in, prevH = b.h_in;
+  b._future.push(bedSnap(b));
+  applySnap(b, JSON.parse(b._hist.pop()));
+  syncBedDimInputs();
+  if (b.w_in !== prevW || b.h_in !== prevH) fitBed(true);
+  else { drawGrid(); renderAll(); }
 }
 function redo() {
   const b = bed();
   if (!b._future || !b._future.length) return;
-  b._hist.push(JSON.stringify(b.plants));
-  b.plants = JSON.parse(b._future.pop());
-  renderAll();
+  const prevW = b.w_in, prevH = b.h_in;
+  b._hist.push(bedSnap(b));
+  applySnap(b, JSON.parse(b._future.pop()));
+  syncBedDimInputs();
+  if (b.w_in !== prevW || b.h_in !== prevH) fitBed(true);
+  else { drawGrid(); renderAll(); }
 }
 
 // ── tab management ────────────────────────────────────────
@@ -490,12 +494,12 @@ function renderTabs() {
 
 function switchBed(i) {
   activeBedIdx = i;
-  zoom = 1.0;
   hoverIdx = -1;
   gesture = null;
   document.getElementById('bedNameInput').value = bed().name;
+  syncBedDimInputs();
   renderTabs();
-  resize();
+  fitBed(true);
 }
 
 function addBed() {
@@ -518,139 +522,146 @@ document.getElementById('bedNameInput').addEventListener('input', e => {
   renderTabs();
 });
 
-// ── resize ────────────────────────────────────────────────
-function resize() {
-  const b = bed();
-  const aspect = b.h_in / b.w_in;
-  // Use .bed-wrapper (flex:1 item) for a stable reference that doesn't
-  // feed back into itself the way bed-frame.clientWidth did.
-  const bedWrap = document.querySelector('.bed-wrapper');
-  const rulerLeftW = 28;
-  const avW = Math.max(100, bedWrap.clientWidth - rulerLeftW - FRAME_PAD - 4);
-  const avH = window.innerHeight * 0.78;
-  baseCanvasW = Math.round(Math.min(avW, avH / aspect));
-  baseCanvasH = Math.round(baseCanvasW * aspect);
-  applyZoom();
-}
-
-function applyZoom() {
-  const b = bed();
-
-  // Canvas always stays at base dimensions — zoom is purely a CSS transform.
-  canvas.width        = baseCanvasW;
-  canvas.height       = baseCanvasH;
-  canvas.style.width  = baseCanvasW + 'px';
-  canvas.style.height = baseCanvasH + 'px';
-  gridCv.width        = baseCanvasW;
-  gridCv.height       = baseCanvasH;
-  gridCv.style.width  = baseCanvasW + 'px';
-  gridCv.style.height = baseCanvasH + 'px';
-  pxPerIn = baseCanvasW / b.w_in;
-
-  document.getElementById('bedDimsLabel').textContent =
-    `${b.w_in/12} ft × ${b.h_in/12} ft`;
-
-  // Build content at base size first so the scaler has correct dimensions.
-  buildRulers();
-  drawGrid();
-  renderAll();
-  updateSizeUI();
-
-  // Now apply the CSS transform and size the spacer for scroll range.
-  const scaler   = document.getElementById('bedScaler');
-  const viewport = document.getElementById('bedViewport');
-
-  scaler.style.transform = 'none';
-  const nW = scaler.offsetWidth;
-  const nH = scaler.offsetHeight;
-  scaler.style.transform       = `scale(${zoom})`;
-  scaler.style.transformOrigin = 'top left';
-
-  // An invisible spacer gives the viewport the correct scrollable area.
-  let spacer = document.getElementById('zoomSpacer');
-  if (!spacer) {
-    spacer = document.createElement('div');
-    spacer.id = 'zoomSpacer';
-    spacer.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;visibility:hidden;';
-    viewport.appendChild(spacer);
-  }
-  spacer.style.width  = Math.round(nW * zoom) + 'px';
-  spacer.style.height = Math.round(nH * zoom) + 'px';
-
-  const pct = Math.round(zoom * 100);
-  document.getElementById('zoomDisplay').textContent = pct + '%';
-  document.getElementById('btnZoomReset').classList.toggle('zoomed', zoom !== 1.0);
-}
-
-function setZoom(level) {
-  const viewport = document.getElementById('bedViewport');
-  const prev = zoom;
-  zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM,
-         Math.round(level / ZOOM_STEP) * ZOOM_STEP));
-  if (zoom === prev) return;
-  // Keep the visual centre stable while zooming.
-  const cx = (viewport.scrollLeft + viewport.clientWidth  / 2) / prev;
-  const cy = (viewport.scrollTop  + viewport.clientHeight / 2) / prev;
-  applyZoom();
-  requestAnimationFrame(() => {
-    viewport.scrollLeft = cx * zoom - viewport.clientWidth  / 2;
-    viewport.scrollTop  = cy * zoom - viewport.clientHeight / 2;
+function clampPlants(b) {
+  b.plants.forEach(p => {
+    p.x_in = Math.max(p.r_in, Math.min(b.w_in - p.r_in, p.x_in));
+    p.y_in = Math.max(p.r_in, Math.min(b.h_in - p.r_in, p.y_in));
   });
 }
 
-// ── rulers ────────────────────────────────────────────────
-const GRID_IN = 4;
-function buildRulers() {
+function syncBedDimInputs() {
   const b = bed();
-  // Rulers always reflect 100% zoom scale so they stay accurate as a reference.
-  const basePx = baseCanvasW / b.w_in;
-  const cell   = GRID_IN * basePx;
-  const cols   = b.w_in / GRID_IN;
-  const rows   = b.h_in / GRID_IN;
+  document.getElementById('bedWidthInput').value  = b.w_in / 12;
+  document.getElementById('bedHeightInput').value = b.h_in / 12;
+}
 
-  const corner = document.getElementById('rulerCorner');
-  corner.style.width = '28px'; corner.style.height = '20px';
+function onDimChange() {
+  const wFt = parseFloat(document.getElementById('bedWidthInput').value);
+  const hFt = parseFloat(document.getElementById('bedHeightInput').value);
+  if (!Number.isFinite(wFt) || !Number.isFinite(hFt)) return;
+  const wIn = Math.round(Math.max(1, Math.min(50, wFt)) * 12);
+  const hIn = Math.round(Math.max(1, Math.min(50, hFt)) * 12);
+  const b = bed();
+  if (b.w_in === wIn && b.h_in === hIn) return;
+  saveH();
+  b.w_in = wIn;
+  b.h_in = hIn;
+  clampPlants(b);
+  fitBed(true); // animate to new fit
+}
 
-  const rt = document.getElementById('rulerTop');
-  rt.innerHTML = ''; rt.style.width = baseCanvasW+'px'; rt.style.height = '20px';
-  for (let i=0; i<cols; i++) {
-    const d = document.createElement('div');
-    d.className = 'ruler-top-cell';
-    d.style.width = cell+'px'; d.style.height = '20px';
-    const inch = i * GRID_IN;
-    if (inch % 12 === 0) d.textContent = inch===0 ? '0' : (inch/12)+'ft';
-    rt.appendChild(d);
+document.getElementById('bedWidthInput') .addEventListener('change', onDimChange);
+document.getElementById('bedHeightInput').addEventListener('change', onDimChange);
+
+// ── camera helpers ────────────────────────────────────────
+const GRID_IN = 4;
+
+// logScale = the ratio applied to ctx.setTransform. At logScale=1 the
+// canvas draws in logical-pixel space where pxPerIn logical px = 1 inch.
+function logScale() { return cam.scale / pxPerIn; }
+
+function updateZoomDisplay() {
+  const pct = fitScale > 0 ? Math.round(cam.scale / fitScale * 100) : 100;
+  document.getElementById('zoomDisplay').textContent = pct + '%';
+  const zoomed = fitScale > 0 && Math.abs(cam.scale - fitScale) > fitScale * 0.02;
+  document.getElementById('btnZoomReset').classList.toggle('zoomed', zoomed);
+}
+
+// Zoom toward a point (cx, cy) in canvas-element pixels by a multiplier.
+function zoomAtPoint(factor, cx, cy) {
+  const prev = cam.scale;
+  cam.scale = Math.max(fitScale * 0.08, Math.min(fitScale * 30, cam.scale * factor));
+  const sf = cam.scale / prev;
+  cam.x = cx - (cx - cam.x) * sf;
+  cam.y = cy - (cy - cam.y) * sf;
+  updateZoomDisplay();
+  drawGrid(); renderAll();
+}
+
+// Animate camera to target position + scale with ease-out cubic.
+function animateCam(toX, toY, toScale, duration = 380) {
+  if (animId) cancelAnimationFrame(animId);
+  const fromX = cam.x, fromY = cam.y, fromScale = cam.scale;
+  const t0 = performance.now();
+  function tick(now) {
+    const t  = Math.min(1, (now - t0) / duration);
+    const e  = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    cam.x     = fromX     + (toX     - fromX)     * e;
+    cam.y     = fromY     + (toY     - fromY)     * e;
+    cam.scale = fromScale + (toScale - fromScale) * e;
+    updateZoomDisplay();
+    drawGrid(); renderAll();
+    animId = t < 1 ? requestAnimationFrame(tick) : null;
   }
+  animId = requestAnimationFrame(tick);
+}
 
-  const rl = document.getElementById('rulerLeft');
-  rl.innerHTML = ''; rl.style.width = '28px'; rl.style.height = baseCanvasH+'px';
-  for (let i=0; i<rows; i++) {
-    const d = document.createElement('div');
-    d.className = 'ruler-left-cell';
-    d.style.height = cell+'px'; d.style.width = '28px';
-    const inch = i * GRID_IN;
-    if (inch % 12 === 0) d.textContent = inch===0 ? '0' : (inch/12)+'ft';
-    rl.appendChild(d);
-  }
+// Fit the active bed into the viewport, optionally animating.
+function fitBed(animate = false) {
+  const b   = bed();
+  const vp  = document.getElementById('bedViewport');
+  const W   = vp.clientWidth  || canvas.width;
+  const H   = vp.clientHeight || canvas.height;
+  const PAD = 32;
+  fitScale   = Math.min((W - PAD * 2) / b.w_in, (H - PAD * 2) / b.h_in);
+  const tx   = (W - b.w_in * fitScale) / 2;
+  const ty   = (H - b.h_in * fitScale) / 2;
+  if (animate) { animateCam(tx, ty, fitScale); }
+  else { cam.x = tx; cam.y = ty; cam.scale = fitScale; updateZoomDisplay(); drawGrid(); renderAll(); }
+}
+
+// Resize canvases to fill the viewport, then fit the bed.
+function resize() {
+  const vp = document.getElementById('bedViewport');
+  const W  = vp.clientWidth  || window.innerWidth;
+  const H  = vp.clientHeight || window.innerHeight;
+  canvas.width  = gridCv.width  = W;
+  canvas.height = gridCv.height = H;
+  syncBedDimInputs();
+  fitBed(false);
 }
 
 // ── grid ──────────────────────────────────────────────────
 function drawGrid() {
   const b = bed();
-  const w = gridCv.width, h = gridCv.height, cell = GRID_IN * pxPerIn;
-  gCtx.clearRect(0,0,w,h);
-  for (let c=0; c<=b.w_in/GRID_IN; c++) {
-    const x=Math.round(c*cell), ft=(c*GRID_IN)%12===0;
-    gCtx.beginPath(); gCtx.moveTo(x,0); gCtx.lineTo(x,h);
-    gCtx.strokeStyle=ft?'rgba(255,255,255,.28)':'rgba(255,255,255,.10)';
-    gCtx.lineWidth=ft?1.5:.8; gCtx.stroke();
+  const ls = logScale();
+  const bW = b.w_in * pxPerIn, bH = b.h_in * pxPerIn;
+  const cell = GRID_IN * pxPerIn;
+  gCtx.clearRect(0, 0, gridCv.width, gridCv.height);
+  gCtx.save();
+  gCtx.setTransform(ls, 0, 0, ls, cam.x, cam.y);
+
+  // Soil fill with texture
+  gCtx.fillStyle = '#8B6347';
+  gCtx.fillRect(0, 0, bW, bH);
+  gCtx.fillStyle = 'rgba(160,120,90,.22)';
+  gCtx.fillRect(0, 0, bW * .4, bH * .4);
+  gCtx.fillStyle = 'rgba(80,50,20,.15)';
+  gCtx.fillRect(bW * .55, bH * .55, bW * .45, bH * .45);
+
+  // Wood frame border (drawn before grid lines)
+  const fw = 8 / ls; // 8 screen-px frame regardless of zoom
+  gCtx.strokeStyle = '#6B4423';
+  gCtx.lineWidth   = fw;
+  gCtx.shadowColor = 'rgba(0,0,0,.35)'; gCtx.shadowBlur = 16 / ls; gCtx.shadowOffsetY = 4 / ls;
+  gCtx.strokeRect(-fw / 2, -fw / 2, bW + fw, bH + fw);
+  gCtx.shadowColor = 'transparent'; gCtx.shadowBlur = 0; gCtx.shadowOffsetY = 0;
+
+  // Grid lines — kept at constant screen-pixel weight
+  const lw1 = 0.8 / ls, lw2 = 1.5 / ls;
+  for (let c = 0; c <= b.w_in / GRID_IN; c++) {
+    const x = Math.round(c * cell), ft = (c * GRID_IN) % 12 === 0;
+    gCtx.beginPath(); gCtx.moveTo(x, 0); gCtx.lineTo(x, bH);
+    gCtx.strokeStyle = ft ? 'rgba(255,255,255,.28)' : 'rgba(255,255,255,.10)';
+    gCtx.lineWidth = ft ? lw2 : lw1; gCtx.stroke();
   }
-  for (let r=0; r<=b.h_in/GRID_IN; r++) {
-    const y=Math.round(r*cell), ft=(r*GRID_IN)%12===0;
-    gCtx.beginPath(); gCtx.moveTo(0,y); gCtx.lineTo(w,y);
-    gCtx.strokeStyle=ft?'rgba(255,255,255,.28)':'rgba(255,255,255,.10)';
-    gCtx.lineWidth=ft?1.5:.8; gCtx.stroke();
+  for (let r = 0; r <= b.h_in / GRID_IN; r++) {
+    const y = Math.round(r * cell), ft = (r * GRID_IN) % 12 === 0;
+    gCtx.beginPath(); gCtx.moveTo(0, y); gCtx.lineTo(bW, y);
+    gCtx.strokeStyle = ft ? 'rgba(255,255,255,.28)' : 'rgba(255,255,255,.10)';
+    gCtx.lineWidth = ft ? lw2 : lw1; gCtx.stroke();
   }
+  gCtx.restore();
 }
 
 // ── snap ──────────────────────────────────────────────────
@@ -662,8 +673,24 @@ function snap(xPx,yPx){
 
 // ── render ────────────────────────────────────────────────
 function renderAll(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  plants().forEach((p,i)=>drawPlant(p, i===hoverIdx && mode==='delete'));
+  const ls = logScale();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.setTransform(ls, 0, 0, ls, cam.x, cam.y);
+  plants().forEach((p,i) => drawPlant(p, i === hoverIdx && mode === 'delete'));
+  ctx.restore();
+}
+
+function cloudPath(ctx, cx, cy, r) {
+  const n = 8, amp = r * 0.08, steps = n * 16;
+  ctx.beginPath();
+  for (let i = 0; i <= steps; i++) {
+    const a = (i / steps) * Math.PI * 2;
+    const rr = r + amp * Math.sin(n * a);
+    const px = cx + rr * Math.cos(a), py = cy + rr * Math.sin(a);
+    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+  }
+  ctx.closePath();
 }
 
 function drawPlant(p, deleteHover){
@@ -671,22 +698,15 @@ function drawPlant(p, deleteHover){
   ctx.globalAlpha = 1;
   ctx.save();
   ctx.shadowColor='rgba(0,0,0,.28)'; ctx.shadowBlur=6; ctx.shadowOffsetY=3;
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  cloudPath(ctx,x,y,r);
   ctx.fillStyle = deleteHover ? 'rgba(180,40,40,.55)' : p.color;
   ctx.fill();
   ctx.restore();
   ctx.save(); ctx.setLineDash([4,3]);
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  cloudPath(ctx,x,y,r);
   ctx.strokeStyle = deleteHover ? '#C94040' : darken(p.color,.22);
   ctx.lineWidth=deleteHover?2.5:1.5; ctx.stroke();
   ctx.restore();
-  if (r>20 && !deleteHover) {
-    ctx.save();
-    ctx.translate(x+r*.54,y-r*.54); ctx.rotate(-Math.PI/4);
-    ctx.fillStyle=darken(p.color,.28);
-    ctx.beginPath(); ctx.ellipse(0,0,r*.13,r*.22,0,0,Math.PI*2); ctx.fill();
-    ctx.restore();
-  }
   if (deleteHover) {
     ctx.save();
     ctx.strokeStyle='#fff'; ctx.lineWidth=Math.max(2,r*.12); ctx.lineCap='round';
@@ -728,6 +748,17 @@ function hit(xPx,yPx){
 
 // ── canvas events ─────────────────────────────────────────
 canvas.addEventListener('mousedown', e=>{
+  if (e.button !== 0) return; // only left-click interacts with plants
+  // Space+left-drag initiates a pan — skip all plant interactions.
+  if (spaceDown && e.button === 0) {
+    e.preventDefault();
+    panActive = true;
+    panStartX = e.clientX; panStartY = e.clientY;
+    panCamX0 = cam.x; panCamY0 = cam.y;
+    canvas.style.cursor = 'grabbing';
+    return;
+  }
+
   const {x,y} = pos(e);
   const b = bed();
 
@@ -762,6 +793,8 @@ canvas.addEventListener('mousedown', e=>{
 
 canvas.addEventListener('mousemove', e=>{
   const {x,y} = pos(e);
+  const r0 = canvas.getBoundingClientRect();
+  const screenX = e.clientX - r0.left, screenY = e.clientY - r0.top;
   const b = bed();
 
   if (mode === 'delete') {
@@ -795,7 +828,7 @@ canvas.addEventListener('mousemove', e=>{
     gesture.liveX_in = Math.max(r, Math.min(b.w_in-r, gesture.liveX_in));
     gesture.liveY_in = Math.max(r, Math.min(b.h_in-r, gesture.liveY_in));
     renderAll();
-    drawGhost(gesture.liveX_in, gesture.liveY_in, gesture.liveR_in, dist, x, y);
+    drawGhost(gesture.liveX_in, gesture.liveY_in, gesture.liveR_in, dist, screenX, screenY);
   }
 });
 
@@ -830,32 +863,39 @@ canvas.addEventListener('mouseleave', ()=>{
 
 // ── ghost preview during drag-size ────────────────────────
 function drawGhost(cx_in, cy_in, r_in, dist, cursorX, cursorY) {
-  const x=cx_in*pxPerIn, y=cy_in*pxPerIn, r=r_in*pxPerIn;
+  const ls = logScale();
+  const x = cx_in * pxPerIn, y = cy_in * pxPerIn, r = r_in * pxPerIn;
+  // Ghost circle in logical-pixel space (with cam transform)
   ctx.save();
-  ctx.globalAlpha=0.55;
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-  ctx.fillStyle=color; ctx.fill();
+  ctx.setTransform(ls, 0, 0, ls, cam.x, cam.y);
+  ctx.globalAlpha = 0.55;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = color; ctx.fill();
+  ctx.setLineDash([5, 4]);
+  ctx.globalAlpha = 1;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.strokeStyle = darken(color, .3);
+  ctx.lineWidth = 2 / ls; ctx.stroke();
   ctx.restore();
+  // Guide line from plant center to cursor (screen space)
+  const sx = cam.x + x * ls, sy = cam.y + y * ls;
   ctx.save();
-  ctx.setLineDash([5,4]);
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-  ctx.strokeStyle=darken(color,.3); ctx.lineWidth=2; ctx.stroke();
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(cursorX, cursorY);
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1.5; ctx.stroke();
   ctx.restore();
+  // Diameter label near cursor (always in screen space)
+  const label = `${Math.round(r_in * 2)}″ ⌀`, fs = 12;
   ctx.save();
-  ctx.setLineDash([3,3]);
-  ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(cursorX,cursorY);
-  ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=1.5; ctx.stroke();
-  ctx.restore();
-  const label=`${Math.round(r_in*2)}″ ⌀`, fs=12;
-  ctx.save();
-  ctx.font=`bold ${fs}px 'Lato',sans-serif`;
-  const tw=ctx.measureText(label).width, lx=cursorX+10, ly=cursorY-10;
-  ctx.fillStyle='rgba(58,42,26,.75)';
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.font = `bold ${fs}px 'Lato',sans-serif`;
+  const tw = ctx.measureText(label).width, lx = cursorX + 10, ly = cursorY - 10;
+  ctx.fillStyle = 'rgba(58,42,26,.75)';
   ctx.beginPath();
-  ctx.roundRect ? ctx.roundRect(lx-4,ly-fs,tw+8,fs+6,4) : ctx.rect(lx-4,ly-fs,tw+8,fs+6);
+  ctx.roundRect ? ctx.roundRect(lx - 4, ly - fs, tw + 8, fs + 6, 4) : ctx.rect(lx - 4, ly - fs, tw + 8, fs + 6);
   ctx.fill();
-  ctx.fillStyle='#fff'; ctx.textBaseline='alphabetic';
-  ctx.fillText(label,lx,ly);
+  ctx.fillStyle = '#fff'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText(label, lx, ly);
   ctx.restore();
 }
 
@@ -865,8 +905,12 @@ canvas.addEventListener('touchmove', e=>{e.preventDefault();canvas.dispatchEvent
 canvas.addEventListener('touchend',  e=>{e.preventDefault();canvas.dispatchEvent(new MouseEvent('mouseup'));},{passive:false});
 
 function pos(e){
-  const r=canvas.getBoundingClientRect();
-  return{x:(e.clientX-r.left)*(canvas.width/r.width),y:(e.clientY-r.top)*(canvas.height/r.height)};
+  const r = canvas.getBoundingClientRect();
+  const ls = logScale();
+  return {
+    x: (e.clientX - r.left - cam.x) / ls,
+    y: (e.clientY - r.top  - cam.y) / ls
+  };
 }
 
 function setCanvasCursor(){
@@ -1025,6 +1069,11 @@ document.addEventListener('keydown', e=>{
   if(e.target.tagName==='INPUT') return;
   if(e.ctrlKey && e.key==='z'){e.preventDefault(); undo(); return;}
   if(e.ctrlKey && (e.key==='y' || (e.shiftKey && e.key==='Z'))){e.preventDefault(); redo(); return;}
+  if(e.key===' ' && !e.ctrlKey && !e.altKey){
+    e.preventDefault(); // prevent page scroll
+    if(!spaceDown){ spaceDown=true; if(!panActive) canvas.style.cursor='grab'; }
+    return;
+  }
   if(e.key==='Control' && mode !== 'delete' && modeBeforeCtrl === null){
     modeBeforeCtrl = mode;
     mode = 'delete';
@@ -1037,6 +1086,12 @@ document.addEventListener('keydown', e=>{
 });
 
 document.addEventListener('keyup', e=>{
+  if(e.key===' '){
+    spaceDown=false;
+    if(panActive){ panActive=false; }
+    setCanvasCursor();
+    return;
+  }
   if(e.key==='Control' && modeBeforeCtrl !== null){
     mode = modeBeforeCtrl;
     modeBeforeCtrl = null;
@@ -1050,21 +1105,57 @@ document.addEventListener('keyup', e=>{
 
 // ── PNG export (active bed only) ─────────────────────────
 function exportPNG(){
-  // create a composite canvas with soil background + grid + plants
-  const off=document.createElement('canvas');
-  off.width=canvas.width; off.height=canvas.height;
-  const oc=off.getContext('2d');
-  // soil fill
-  oc.fillStyle='#8B6347';
-  oc.fillRect(0,0,off.width,off.height);
-  // draw grid overlay
-  oc.drawImage(gridCv,0,0);
-  // draw plants
-  oc.drawImage(canvas,0,0);
-  // download
-  const link=document.createElement('a');
-  link.download=`${bed().name.replace(/\s+/g,'_')}.png`;
-  link.href=off.toDataURL('image/png');
+  const b = bed();
+  const exportPPI = 14; // px per inch for exported image
+  const W = Math.ceil(b.w_in * exportPPI), H = Math.ceil(b.h_in * exportPPI);
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const oc = off.getContext('2d');
+  const ls = exportPPI / pxPerIn;
+
+  // Soil + grid
+  oc.setTransform(ls, 0, 0, ls, 0, 0);
+  const bW = b.w_in * pxPerIn, bH = b.h_in * pxPerIn;
+  oc.fillStyle = '#8B6347'; oc.fillRect(0, 0, bW, bH);
+  const cell = GRID_IN * pxPerIn;
+  const lw1 = 0.8 / ls, lw2 = 1.5 / ls;
+  for (let c = 0; c <= b.w_in / GRID_IN; c++) {
+    const x = Math.round(c * cell), ft = (c * GRID_IN) % 12 === 0;
+    oc.beginPath(); oc.moveTo(x, 0); oc.lineTo(x, bH);
+    oc.strokeStyle = ft ? 'rgba(255,255,255,.28)' : 'rgba(255,255,255,.10)';
+    oc.lineWidth = ft ? lw2 : lw1; oc.stroke();
+  }
+  for (let r = 0; r <= b.h_in / GRID_IN; r++) {
+    const y = Math.round(r * cell), ft = (r * GRID_IN) % 12 === 0;
+    oc.beginPath(); oc.moveTo(0, y); oc.lineTo(bW, y);
+    oc.strokeStyle = ft ? 'rgba(255,255,255,.28)' : 'rgba(255,255,255,.10)';
+    oc.lineWidth = ft ? lw2 : lw1; oc.stroke();
+  }
+  // Plants — temporarily redirect ctx to oc
+  const savedCtx = { transform: [cam.scale, cam.x, cam.y] };
+  const origCam = { ...cam };
+  cam.x = 0; cam.y = 0; cam.scale = exportPPI;
+  const origCanvas = canvas;
+  // Draw plants directly to oc using same drawPlant logic
+  b.plants.forEach(p => {
+    const r = p.r_in * pxPerIn, x = p.x_in * pxPerIn, y = p.y_in * pxPerIn;
+    oc.save(); oc.shadowColor='rgba(0,0,0,.28)'; oc.shadowBlur=6/ls; oc.shadowOffsetY=3/ls;
+    oc.beginPath(); oc.arc(x,y,r,0,Math.PI*2); oc.fillStyle=p.color; oc.fill(); oc.restore();
+    oc.save(); oc.setLineDash([4,3]); oc.beginPath(); oc.arc(x,y,r,0,Math.PI*2);
+    oc.strokeStyle=darken(p.color,.22); oc.lineWidth=1.5/ls; oc.stroke(); oc.restore();
+    if (p.label) {
+      const fs = Math.max(8, Math.min(13, r * .37)) / ls;
+      oc.save(); oc.font=`italic ${fs}px 'Playfair Display',serif`;
+      oc.fillStyle='#3A2A1A'; oc.textAlign='center'; oc.textBaseline='middle';
+      oc.fillText(p.label, x, y, r * 1.75); oc.restore();
+    }
+  });
+  cam.x = origCam.x; cam.y = origCam.y; cam.scale = origCam.scale;
+
+  oc.setTransform(1, 0, 0, 1, 0, 0);
+  const link = document.createElement('a');
+  link.download = `${b.name.replace(/\s+/g,'_')}.png`;
+  link.href = off.toDataURL('image/png');
   link.click();
 }
 
@@ -1157,21 +1248,48 @@ function makeBedFromData(d){
 }
 
 // ── zoom controls ─────────────────────────────────────────
-document.getElementById('btnZoomIn').addEventListener('click', () => setZoom(zoom + ZOOM_STEP));
-document.getElementById('btnZoomOut').addEventListener('click', () => setZoom(zoom - ZOOM_STEP));
-document.getElementById('btnZoomReset').addEventListener('click', () => setZoom(1.0));
+document.getElementById('btnZoomIn') .addEventListener('click', () => zoomAtPoint(1.25, canvas.width / 2, canvas.height / 2));
+document.getElementById('btnZoomOut').addEventListener('click', () => zoomAtPoint(0.8,  canvas.width / 2, canvas.height / 2));
+document.getElementById('btnZoomReset').addEventListener('click', () => fitBed(true));
 
-// Scroll wheel zooms; scrollbars handle panning.
+// Scroll wheel zooms toward the cursor position.
 document.getElementById('bedViewport').addEventListener('wheel', e => {
   e.preventDefault();
-  setZoom(zoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+  const r = canvas.getBoundingClientRect();
+  zoomAtPoint(e.deltaY < 0 ? 1.1 : 0.9, e.clientX - r.left, e.clientY - r.top);
 }, { passive: false });
+
+// ── pan: middle-mouse drag ────────────────────────────────
+document.getElementById('bedViewport').addEventListener('mousedown', e => {
+  if (e.button !== 1) return;
+  e.preventDefault();
+  panActive = true;
+  panStartX = e.clientX; panStartY = e.clientY;
+  panCamX0 = cam.x; panCamY0 = cam.y;
+  canvas.style.cursor = 'grabbing';
+});
+
+// Shared move/up on document so drag works outside the viewport.
+document.addEventListener('mousemove', e => {
+  if (!panActive) return;
+  cam.x = panCamX0 + (e.clientX - panStartX);
+  cam.y = panCamY0 + (e.clientY - panStartY);
+  drawGrid(); renderAll();
+});
+
+document.addEventListener('mouseup', e => {
+  if (!panActive) return;
+  if (e.button === 1 || e.button === 0) {
+    panActive = false;
+    setCanvasCursor();
+  }
+});
 
 // ── init ──────────────────────────────────────────────────
 renderTabs();
 renderProfilesList();
 window.addEventListener('resize',resize);
-resize();
+requestAnimationFrame(() => { resize(); syncBedDimInputs(); });
 </script>
 </body>
 </html>
