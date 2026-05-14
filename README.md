@@ -1,6 +1,6 @@
 # Garden Bed Planner
 
-A browser-based tool for graphically designing and planning raised garden beds. Place, size, and label plants on an interactive infinite canvas with a real-scale 4″ grid system. Save your designs to JSON, export as PNG, or print a full layout with a plant legend.
+A browser-based tool for graphically designing and planning raised garden beds. Place, size, and label plants on an interactive infinite canvas with a real-scale adjustable grid system. Save your designs to JSON, export as PNG, or print a full layout with a plant legend.
 
 **Live app:** https://ty10y.github.io/Garden-Bed-Planner/
 
